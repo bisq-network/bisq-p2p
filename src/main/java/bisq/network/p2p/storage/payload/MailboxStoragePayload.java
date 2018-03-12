@@ -18,20 +18,26 @@
 package bisq.network.p2p.storage.payload;
 
 import bisq.network.p2p.PrefixedSealedAndSignedMessage;
-import com.google.protobuf.ByteString;
+
 import bisq.common.crypto.Sig;
+
 import io.bisq.generated.protobuffer.PB;
-import bisq.network.p2p.PrefixedSealedAndSignedMessage;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+
+import com.google.protobuf.ByteString;
+
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.Nullable;
 import java.security.PublicKey;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.annotation.Nullable;
 
 /**
  * Payload which supports a time to live and sender and receiver's pub keys for storage operations.

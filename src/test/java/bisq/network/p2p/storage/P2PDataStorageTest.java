@@ -17,40 +17,48 @@
 
 package bisq.network.p2p.storage;
 
-import bisq.common.crypto.CryptoException;
-import bisq.common.crypto.KeyRing;
-import bisq.common.crypto.KeyStorage;
-import bisq.common.proto.network.NetworkProtoResolver;
-import bisq.common.proto.persistable.PersistenceProtoResolver;
-import bisq.common.storage.FileUtil;
-import bisq.network.p2p.NodeAddress;
-import bisq.network.p2p.TestUtils;
-import bisq.network.p2p.network.NetworkNode;
-import bisq.network.p2p.peers.Broadcaster;
-import bisq.network.p2p.storage.payload.ProtectedStoragePayload;
 import bisq.network.crypto.EncryptionService;
 import bisq.network.p2p.NodeAddress;
 import bisq.network.p2p.TestUtils;
 import bisq.network.p2p.network.NetworkNode;
 import bisq.network.p2p.peers.Broadcaster;
 import bisq.network.p2p.storage.payload.ProtectedStoragePayload;
+
+import bisq.common.crypto.CryptoException;
+import bisq.common.crypto.KeyRing;
+import bisq.common.crypto.KeyStorage;
+import bisq.common.proto.network.NetworkProtoResolver;
+import bisq.common.proto.persistable.PersistenceProtoResolver;
+import bisq.common.storage.FileUtil;
+
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.Security;
+import java.security.SignatureException;
+import java.security.cert.CertificateException;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import java.io.File;
+import java.io.IOException;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import lombok.extern.slf4j.Slf4j;
+
 import mockit.Mocked;
 import mockit.integration.junit4.JMockit;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.runner.RunWith;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.*;
-import java.security.cert.CertificateException;
-import java.util.HashSet;
-import java.util.Set;
 
 @Slf4j
 @RunWith(JMockit.class)

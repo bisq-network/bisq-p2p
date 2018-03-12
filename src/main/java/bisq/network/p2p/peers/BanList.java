@@ -17,13 +17,15 @@
 
 package bisq.network.p2p.peers;
 
-import bisq.network.p2p.NodeAddress;
-import com.google.inject.name.Named;
 import bisq.network.NetworkOptionKeys;
 import bisq.network.p2p.NodeAddress;
-import org.apache.commons.lang3.StringUtils;
+
+import com.google.inject.name.Named;
 
 import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

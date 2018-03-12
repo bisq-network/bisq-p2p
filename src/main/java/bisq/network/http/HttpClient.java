@@ -18,11 +18,9 @@
 package bisq.network.http;
 
 import bisq.network.Socks5ProxyProvider;
-import com.runjva.sourceforge.jsocks.protocol.Socks5Proxy;
+
 import bisq.common.app.Version;
-import bisq.network.Socks5ProxyProvider;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
@@ -34,16 +32,25 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
 
-import javax.annotation.Nullable;
+import com.runjva.sourceforge.jsocks.protocol.Socks5Proxy;
+
 import javax.inject.Inject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
+
 import java.util.UUID;
+
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

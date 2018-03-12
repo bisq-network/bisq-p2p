@@ -17,15 +17,19 @@
 
 package bisq.network.p2p.network;
 
-import bisq.common.proto.network.NetworkEnvelope;
-import io.bisq.generated.protobuffer.PB;
 import bisq.network.p2p.peers.keepalive.messages.KeepAliveMessage;
+
+import bisq.common.proto.network.NetworkEnvelope;
+
+import io.bisq.generated.protobuffer.PB;
+
+import java.io.IOException;
+import java.io.OutputStream;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import java.io.IOException;
-import java.io.OutputStream;
 
 @NotThreadSafe
 class ProtoOutputStream {

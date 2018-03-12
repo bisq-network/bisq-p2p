@@ -18,13 +18,16 @@
 package bisq.network.p2p.storage.mocks;
 
 import bisq.network.p2p.storage.payload.ProtectedStoragePayload;
+
 import io.bisq.generated.protobuffer.PB;
-import bisq.network.p2p.storage.payload.ProtectedStoragePayload;
+
 import org.apache.commons.lang3.NotImplementedException;
 
-import javax.annotation.Nullable;
 import java.security.PublicKey;
+
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 @SuppressWarnings("ALL")
 public class MockData implements ProtectedStoragePayload {

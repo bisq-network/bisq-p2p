@@ -21,22 +21,22 @@ import bisq.network.p2p.network.CloseConnectionReason;
 import bisq.network.p2p.network.Connection;
 import bisq.network.p2p.network.NetworkNode;
 import bisq.network.p2p.peers.PeerManager;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.SettableFuture;
+import bisq.network.p2p.peers.peerexchange.messages.GetPeersRequest;
+import bisq.network.p2p.peers.peerexchange.messages.GetPeersResponse;
+
 import bisq.common.Timer;
 import bisq.common.UserThread;
 import bisq.common.app.Log;
-import bisq.network.p2p.network.CloseConnectionReason;
-import bisq.network.p2p.network.Connection;
-import bisq.network.p2p.network.NetworkNode;
-import bisq.network.p2p.peers.PeerManager;
-import bisq.network.p2p.peers.peerexchange.messages.GetPeersRequest;
-import bisq.network.p2p.peers.peerexchange.messages.GetPeersResponse;
-import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
+
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.SettableFuture;
 
 import java.util.concurrent.TimeUnit;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.jetbrains.annotations.NotNull;
 
 import static com.google.common.base.Preconditions.checkArgument;
 

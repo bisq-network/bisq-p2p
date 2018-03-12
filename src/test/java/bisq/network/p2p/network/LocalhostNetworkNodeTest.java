@@ -18,17 +18,21 @@
 package bisq.network.p2p.network;
 
 import bisq.network.p2p.TestUtils;
-import bisq.network.p2p.TestUtils;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+
+import java.security.Security;
+
+import java.io.IOException;
+
+import java.util.concurrent.CountDownLatch;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.security.Security;
-import java.util.concurrent.CountDownLatch;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 // TorNode created. Took 6 sec.
 // Hidden service created. Took 40-50 sec.

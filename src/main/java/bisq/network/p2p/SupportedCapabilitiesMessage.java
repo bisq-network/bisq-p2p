@@ -17,8 +17,9 @@
 
 package bisq.network.p2p;
 
-import javax.annotation.Nullable;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 public interface SupportedCapabilitiesMessage {
     @Nullable

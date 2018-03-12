@@ -18,11 +18,14 @@
 package bisq.network.p2p.storage.payload;
 
 import bisq.common.proto.network.NetworkProtoResolver;
+
 import io.bisq.generated.protobuffer.PB;
 
-import javax.annotation.Nullable;
 import java.security.PublicKey;
+
 import java.util.Map;
+
+import javax.annotation.Nullable;
 
 /**
  * Messages which support ownership protection (using signatures) and a time to live

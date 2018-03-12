@@ -22,6 +22,7 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.protocol.HttpContext;
 
 import java.io.IOException;
+
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.Socket;

@@ -18,14 +18,16 @@
 package bisq.network.p2p.storage;
 
 import bisq.common.proto.persistable.PersistableEnvelope;
+
 import io.bisq.generated.protobuffer.PB;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * This class was not generalized to HashMapPersistable (like we did with #ListPersistable) because

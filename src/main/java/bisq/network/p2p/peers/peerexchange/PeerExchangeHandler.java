@@ -23,27 +23,26 @@ import bisq.network.p2p.network.Connection;
 import bisq.network.p2p.network.MessageListener;
 import bisq.network.p2p.network.NetworkNode;
 import bisq.network.p2p.peers.PeerManager;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.SettableFuture;
+import bisq.network.p2p.peers.peerexchange.messages.GetPeersRequest;
+import bisq.network.p2p.peers.peerexchange.messages.GetPeersResponse;
+
 import bisq.common.Timer;
 import bisq.common.UserThread;
 import bisq.common.app.Log;
 import bisq.common.proto.network.NetworkEnvelope;
-import bisq.network.p2p.NodeAddress;
-import bisq.network.p2p.network.CloseConnectionReason;
-import bisq.network.p2p.network.Connection;
-import bisq.network.p2p.network.MessageListener;
-import bisq.network.p2p.network.NetworkNode;
-import bisq.network.p2p.peers.PeerManager;
-import bisq.network.p2p.peers.peerexchange.messages.GetPeersRequest;
-import bisq.network.p2p.peers.peerexchange.messages.GetPeersResponse;
+
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.SettableFuture;
+
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
 import lombok.extern.slf4j.Slf4j;
+
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 class PeerExchangeHandler implements MessageListener {

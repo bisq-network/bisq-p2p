@@ -19,17 +19,19 @@ package bisq.network.p2p.peers.getdata.messages;
 
 import bisq.network.p2p.NodeAddress;
 import bisq.network.p2p.SendersNodeAddressMessage;
-import com.google.protobuf.ByteString;
+
 import bisq.common.app.Version;
 import bisq.common.proto.ProtoUtil;
+
 import io.bisq.generated.protobuffer.PB;
-import bisq.network.p2p.NodeAddress;
-import bisq.network.p2p.SendersNodeAddressMessage;
-import lombok.EqualsAndHashCode;
-import lombok.Value;
+
+import com.google.protobuf.ByteString;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

@@ -17,18 +17,22 @@
 
 package bisq.network.p2p.storage;
 
-import com.google.protobuf.Message;
+import bisq.network.p2p.storage.payload.ProtectedStorageEntry;
+
 import bisq.common.proto.network.NetworkProtoResolver;
 import bisq.common.proto.persistable.PersistableEnvelope;
+
 import io.bisq.generated.protobuffer.PB;
-import bisq.network.p2p.storage.payload.ProtectedStorageEntry;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+
+import com.google.protobuf.Message;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 // Only used for converting old TradeStatistic data to new TradeStatistic2 at the moment. But might be used for
 // CompensationRequests and voteItems in future

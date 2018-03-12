@@ -18,7 +18,6 @@
 package bisq.network.p2p.seed;
 
 import bisq.network.p2p.NodeAddress;
-import bisq.network.p2p.NodeAddress;
 
 import java.util.Set;
 

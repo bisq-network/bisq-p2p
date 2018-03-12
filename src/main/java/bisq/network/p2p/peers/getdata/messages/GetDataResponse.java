@@ -17,28 +17,30 @@
 
 package bisq.network.p2p.peers.getdata.messages;
 
-import bisq.common.app.Capabilities;
-import bisq.common.app.Version;
-import bisq.common.proto.network.NetworkEnvelope;
-import bisq.common.proto.network.NetworkProtoResolver;
-import bisq.network.p2p.ExtendedDataSizePermission;
-import bisq.network.p2p.SupportedCapabilitiesMessage;
-import io.bisq.generated.protobuffer.PB;
 import bisq.network.p2p.ExtendedDataSizePermission;
 import bisq.network.p2p.SupportedCapabilitiesMessage;
 import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
 import bisq.network.p2p.storage.payload.ProtectedMailboxStorageEntry;
 import bisq.network.p2p.storage.payload.ProtectedStorageEntry;
-import lombok.EqualsAndHashCode;
-import lombok.Value;
-import lombok.extern.slf4j.Slf4j;
 
-import javax.annotation.Nullable;
+import bisq.common.app.Capabilities;
+import bisq.common.app.Version;
+import bisq.common.proto.network.NetworkEnvelope;
+import bisq.common.proto.network.NetworkProtoResolver;
+
+import io.bisq.generated.protobuffer.PB;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import lombok.EqualsAndHashCode;
+import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
+
+import javax.annotation.Nullable;
 
 @Slf4j
 @EqualsAndHashCode(callSuper = true)

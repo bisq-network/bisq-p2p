@@ -17,7 +17,6 @@
 
 package bisq.network.p2p.storage.payload;
 
-
 import bisq.common.proto.network.NetworkPayload;
 
 import java.util.List;

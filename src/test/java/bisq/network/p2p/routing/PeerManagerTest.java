@@ -19,23 +19,21 @@ package bisq.network.p2p.routing;
 
 import bisq.network.p2p.DummySeedNode;
 import bisq.network.p2p.NodeAddress;
-import bisq.network.p2p.P2PServiceListener;
-import bisq.network.p2p.network.LocalhostNetworkNode;
-import bisq.network.p2p.DummySeedNode;
-import bisq.network.p2p.NodeAddress;
 import bisq.network.p2p.P2PService;
 import bisq.network.p2p.P2PServiceListener;
 import bisq.network.p2p.network.LocalhostNetworkNode;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 // TorNode created. Took 6 sec.
 // Hidden service created. Took 40-50 sec.

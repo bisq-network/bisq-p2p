@@ -27,20 +27,13 @@ import bisq.network.p2p.peers.getdata.RequestDataManager;
 import bisq.network.p2p.peers.keepalive.KeepAliveManager;
 import bisq.network.p2p.peers.peerexchange.PeerExchangeManager;
 import bisq.network.p2p.storage.P2PDataStorage;
+
+import bisq.common.app.AppModule;
+
+import org.springframework.core.env.Environment;
+
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
-import bisq.common.app.AppModule;
-import bisq.network.NetworkOptionKeys;
-import bisq.network.Socks5ProxyProvider;
-import bisq.network.p2p.network.NetworkNode;
-import bisq.network.p2p.peers.BanList;
-import bisq.network.p2p.peers.Broadcaster;
-import bisq.network.p2p.peers.PeerManager;
-import bisq.network.p2p.peers.getdata.RequestDataManager;
-import bisq.network.p2p.peers.keepalive.KeepAliveManager;
-import bisq.network.p2p.peers.peerexchange.PeerExchangeManager;
-import bisq.network.p2p.storage.P2PDataStorage;
-import org.springframework.core.env.Environment;
 
 import java.io.File;
 

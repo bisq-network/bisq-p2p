@@ -17,16 +17,19 @@
 
 package bisq.network.p2p.storage.payload;
 
-import com.google.protobuf.ByteString;
 import bisq.common.crypto.Sig;
 import bisq.common.proto.network.NetworkProtoResolver;
 import bisq.common.util.Utilities;
+
 import io.bisq.generated.protobuffer.PB;
+
+import com.google.protobuf.ByteString;
+
+import java.security.PublicKey;
+
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-
-import java.security.PublicKey;
 
 @Slf4j
 @EqualsAndHashCode(callSuper = true)

@@ -18,10 +18,28 @@
 package bisq.network.p2p.storage;
 
 import bisq.network.p2p.NodeAddress;
+import bisq.network.p2p.network.CloseConnectionReason;
+import bisq.network.p2p.network.Connection;
+import bisq.network.p2p.network.ConnectionListener;
+import bisq.network.p2p.network.MessageListener;
+import bisq.network.p2p.network.NetworkNode;
 import bisq.network.p2p.peers.BroadcastHandler;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.inject.name.Named;
-import com.google.protobuf.ByteString;
+import bisq.network.p2p.peers.Broadcaster;
+import bisq.network.p2p.storage.messages.AddDataMessage;
+import bisq.network.p2p.storage.messages.AddPersistableNetworkPayloadMessage;
+import bisq.network.p2p.storage.messages.BroadcastMessage;
+import bisq.network.p2p.storage.messages.RefreshOfferMessage;
+import bisq.network.p2p.storage.messages.RemoveDataMessage;
+import bisq.network.p2p.storage.messages.RemoveMailboxDataMessage;
+import bisq.network.p2p.storage.payload.DateTolerantPayload;
+import bisq.network.p2p.storage.payload.ExpirablePayload;
+import bisq.network.p2p.storage.payload.MailboxStoragePayload;
+import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
+import bisq.network.p2p.storage.payload.ProtectedMailboxStorageEntry;
+import bisq.network.p2p.storage.payload.ProtectedStorageEntry;
+import bisq.network.p2p.storage.payload.ProtectedStoragePayload;
+import bisq.network.p2p.storage.payload.RequiresOwnerIsOnlinePayload;
+
 import bisq.common.Timer;
 import bisq.common.UserThread;
 import bisq.common.app.Log;
@@ -38,32 +56,47 @@ import bisq.common.storage.ResourceNotFoundException;
 import bisq.common.storage.Storage;
 import bisq.common.util.Tuple2;
 import bisq.common.util.Utilities;
-import io.bisq.generated.protobuffer.PB;
-import bisq.network.p2p.NodeAddress;
-import bisq.network.p2p.network.*;
-import bisq.network.p2p.peers.BroadcastHandler;
-import bisq.network.p2p.peers.Broadcaster;
-import bisq.network.p2p.storage.messages.*;
-import bisq.network.p2p.storage.payload.*;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.ToString;
-import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.util.encoders.Hex;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
+import io.bisq.generated.protobuffer.PB;
+
+import com.google.protobuf.ByteString;
+
+import com.google.inject.name.Named;
+
 import javax.inject.Inject;
-import java.io.File;
-import java.nio.file.Paths;
+
+import com.google.common.annotations.VisibleForTesting;
+
+import org.apache.commons.lang3.StringUtils;
+
+import org.bouncycastle.util.encoders.Hex;
+
 import java.security.KeyPair;
 import java.security.PublicKey;
-import java.util.*;
+
+import java.nio.file.Paths;
+
+import java.io.File;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
+
+import javax.annotation.Nullable;
 
 // Run in UserThread
 public class P2PDataStorage implements MessageListener, ConnectionListener, PersistedDataHost {

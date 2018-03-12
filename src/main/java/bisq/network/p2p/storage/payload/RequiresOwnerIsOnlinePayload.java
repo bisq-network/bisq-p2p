@@ -18,9 +18,9 @@
 package bisq.network.p2p.storage.payload;
 
 
+import bisq.network.p2p.NodeAddress;
+
 import bisq.common.proto.network.NetworkPayload;
-import bisq.network.p2p.NodeAddress;
-import bisq.network.p2p.NodeAddress;
 
 /**
  * Used for network_messages which require that the data owner is online.

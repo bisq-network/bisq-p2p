@@ -17,17 +17,19 @@
 
 package bisq.network.p2p.peers.peerexchange;
 
+import bisq.network.p2p.NodeAddress;
+
 import bisq.common.proto.network.NetworkPayload;
 import bisq.common.proto.persistable.PersistablePayload;
-import bisq.network.p2p.NodeAddress;
+
 import io.bisq.generated.protobuffer.PB;
-import bisq.network.p2p.NodeAddress;
+
+import java.util.Date;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-
-import java.util.Date;
 
 @Getter
 @EqualsAndHashCode(exclude = {"date"})

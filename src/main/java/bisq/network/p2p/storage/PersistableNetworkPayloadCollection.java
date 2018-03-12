@@ -17,19 +17,23 @@
 
 package bisq.network.p2p.storage;
 
-import com.google.protobuf.Message;
+import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
+
 import bisq.common.proto.persistable.PersistableEnvelope;
 import bisq.common.proto.persistable.PersistenceProtoResolver;
+
 import io.bisq.generated.protobuffer.PB;
-import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+
+import com.google.protobuf.Message;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 // That class wraps a map but is represented in PB as a list to reduce data size (no key).
 // PB also does not support a byte array as key and would require some quirks to support such a map (using hex string

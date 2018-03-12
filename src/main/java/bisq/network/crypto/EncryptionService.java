@@ -18,18 +18,30 @@
 package bisq.network.crypto;
 
 import bisq.network.p2p.DecryptedMessageWithPubKey;
-import com.google.protobuf.InvalidProtocolBufferException;
-import bisq.common.crypto.*;
+
+import bisq.common.crypto.CryptoException;
+import bisq.common.crypto.Encryption;
+import bisq.common.crypto.Hash;
+import bisq.common.crypto.KeyRing;
+import bisq.common.crypto.PubKeyRing;
+import bisq.common.crypto.SealedAndSigned;
+import bisq.common.crypto.Sig;
 import bisq.common.proto.network.NetworkEnvelope;
 import bisq.common.proto.network.NetworkProtoResolver;
-import io.bisq.generated.protobuffer.PB;
-import lombok.extern.slf4j.Slf4j;
 
-import javax.crypto.SecretKey;
+import io.bisq.generated.protobuffer.PB;
+
+import com.google.protobuf.InvalidProtocolBufferException;
+
 import javax.inject.Inject;
+
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+
+import javax.crypto.SecretKey;
+
+import lombok.extern.slf4j.Slf4j;
 
 import static bisq.common.crypto.Encryption.decryptSecretKey;
 

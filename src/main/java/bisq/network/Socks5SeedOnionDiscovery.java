@@ -17,15 +17,17 @@
 
 package bisq.network;
 
-import com.runjva.sourceforge.jsocks.protocol.Socks5Proxy;
+import org.libdohj.params.AbstractLitecoinParams;
+
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.net.discovery.PeerDiscovery;
 import org.bitcoinj.net.discovery.PeerDiscoveryException;
-import org.libdohj.params.AbstractLitecoinParams;
+
+import com.runjva.sourceforge.jsocks.protocol.Socks5Proxy;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.TimeUnit;
 
+import java.util.concurrent.TimeUnit;
 
 /**
  * Socks5SeedOnionDiscovery provides a list of known Bitcoin .onion seeds.

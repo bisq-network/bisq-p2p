@@ -17,9 +17,18 @@
 
 package bisq.network.p2p.peers;
 
+import bisq.network.NetworkOptionKeys;
 import bisq.network.p2p.NodeAddress;
+import bisq.network.p2p.network.CloseConnectionReason;
+import bisq.network.p2p.network.Connection;
+import bisq.network.p2p.network.ConnectionListener;
+import bisq.network.p2p.network.InboundConnection;
+import bisq.network.p2p.network.NetworkNode;
+import bisq.network.p2p.network.RuleViolation;
+import bisq.network.p2p.peers.peerexchange.Peer;
+import bisq.network.p2p.peers.peerexchange.PeerList;
 import bisq.network.p2p.seed.SeedNodeRepository;
-import com.google.inject.name.Named;
+
 import bisq.common.Clock;
 import bisq.common.Timer;
 import bisq.common.UserThread;
@@ -27,22 +36,28 @@ import bisq.common.app.Log;
 import bisq.common.proto.persistable.PersistedDataHost;
 import bisq.common.proto.persistable.PersistenceProtoResolver;
 import bisq.common.storage.Storage;
-import bisq.network.NetworkOptionKeys;
-import bisq.network.p2p.NodeAddress;
-import bisq.network.p2p.network.*;
-import bisq.network.p2p.peers.peerexchange.Peer;
-import bisq.network.p2p.peers.peerexchange.PeerList;
-import bisq.network.p2p.seed.SeedNodeRepository;
+
+import com.google.inject.name.Named;
+
+import javax.inject.Inject;
+
+import java.io.File;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.Nullable;
-import javax.inject.Inject;
-import java.io.File;
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class PeerManager implements ConnectionListener, PersistedDataHost {

@@ -21,8 +21,10 @@ import org.apache.http.HttpHost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.protocol.HttpContext;
 
-import javax.net.ssl.SSLContext;
 import java.io.IOException;
+
+import javax.net.ssl.SSLContext;
+
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.Socket;

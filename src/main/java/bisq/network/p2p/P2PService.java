@@ -18,8 +18,14 @@
 package bisq.network.p2p;
 
 import bisq.network.Socks5ProxyProvider;
+import bisq.network.crypto.EncryptionService;
 import bisq.network.p2p.messaging.DecryptedMailboxListener;
-import bisq.network.p2p.network.*;
+import bisq.network.p2p.network.CloseConnectionReason;
+import bisq.network.p2p.network.Connection;
+import bisq.network.p2p.network.ConnectionListener;
+import bisq.network.p2p.network.MessageListener;
+import bisq.network.p2p.network.NetworkNode;
+import bisq.network.p2p.network.SetupListener;
 import bisq.network.p2p.peers.BroadcastHandler;
 import bisq.network.p2p.peers.Broadcaster;
 import bisq.network.p2p.peers.PeerManager;
@@ -32,12 +38,12 @@ import bisq.network.p2p.storage.P2PDataStorage;
 import bisq.network.p2p.storage.messages.AddDataMessage;
 import bisq.network.p2p.storage.messages.BroadcastMessage;
 import bisq.network.p2p.storage.messages.RefreshOfferMessage;
-import bisq.network.p2p.storage.payload.*;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.SettableFuture;
-import com.google.inject.Inject;
+import bisq.network.p2p.storage.payload.MailboxStoragePayload;
+import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
+import bisq.network.p2p.storage.payload.ProtectedMailboxStorageEntry;
+import bisq.network.p2p.storage.payload.ProtectedStorageEntry;
+import bisq.network.p2p.storage.payload.ProtectedStoragePayload;
+
 import bisq.common.UserThread;
 import bisq.common.app.Log;
 import bisq.common.crypto.CryptoException;
@@ -46,37 +52,42 @@ import bisq.common.crypto.PubKeyRing;
 import bisq.common.proto.network.NetworkEnvelope;
 import bisq.common.proto.persistable.PersistedDataHost;
 import bisq.common.util.Utilities;
-import bisq.network.Socks5ProxyProvider;
-import bisq.network.crypto.EncryptionService;
-import bisq.network.p2p.messaging.DecryptedMailboxListener;
-import bisq.network.p2p.network.*;
-import bisq.network.p2p.peers.BroadcastHandler;
-import bisq.network.p2p.peers.Broadcaster;
-import bisq.network.p2p.peers.PeerManager;
-import bisq.network.p2p.peers.getdata.RequestDataManager;
-import bisq.network.p2p.peers.keepalive.KeepAliveManager;
-import bisq.network.p2p.peers.peerexchange.PeerExchangeManager;
-import bisq.network.p2p.seed.SeedNodeRepository;
-import bisq.network.p2p.storage.HashMapChangedListener;
-import bisq.network.p2p.storage.P2PDataStorage;
-import bisq.network.p2p.storage.messages.AddDataMessage;
-import bisq.network.p2p.storage.messages.BroadcastMessage;
-import bisq.network.p2p.storage.messages.RefreshOfferMessage;
-import bisq.network.p2p.storage.payload.*;
-import javafx.beans.property.*;
-import lombok.Getter;
+
+import com.google.inject.Inject;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.SettableFuture;
+
 import org.fxmisc.easybind.EasyBind;
 import org.fxmisc.easybind.Subscription;
 import org.fxmisc.easybind.monadic.MonadicBinding;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ReadOnlyIntegerProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+
+import java.security.PublicKey;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.security.PublicKey;
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.TimeUnit;
+import lombok.Getter;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;

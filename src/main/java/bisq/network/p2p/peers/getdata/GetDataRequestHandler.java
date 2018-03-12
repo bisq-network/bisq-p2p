@@ -20,18 +20,6 @@ package bisq.network.p2p.peers.getdata;
 import bisq.network.p2p.network.CloseConnectionReason;
 import bisq.network.p2p.network.Connection;
 import bisq.network.p2p.network.NetworkNode;
-import bisq.network.p2p.storage.P2PDataStorage;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.SettableFuture;
-import bisq.common.Timer;
-import bisq.common.UserThread;
-import bisq.common.app.Log;
-import bisq.common.proto.persistable.PersistablePayload;
-import bisq.common.util.Utilities;
-import bisq.network.p2p.network.CloseConnectionReason;
-import bisq.network.p2p.network.Connection;
-import bisq.network.p2p.network.NetworkNode;
 import bisq.network.p2p.peers.getdata.messages.GetDataRequest;
 import bisq.network.p2p.peers.getdata.messages.GetDataResponse;
 import bisq.network.p2p.peers.getdata.messages.GetUpdatedDataRequest;
@@ -40,8 +28,16 @@ import bisq.network.p2p.storage.payload.CapabilityRequiringPayload;
 import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
 import bisq.network.p2p.storage.payload.ProtectedStorageEntry;
 import bisq.network.p2p.storage.payload.ProtectedStoragePayload;
-import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
+
+import bisq.common.Timer;
+import bisq.common.UserThread;
+import bisq.common.app.Log;
+import bisq.common.proto.persistable.PersistablePayload;
+import bisq.common.util.Utilities;
+
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.SettableFuture;
 
 import java.util.HashSet;
 import java.util.List;
@@ -49,6 +45,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.jetbrains.annotations.NotNull;
 @Slf4j
 public class GetDataRequestHandler {
     private static final long TIMEOUT = 60;

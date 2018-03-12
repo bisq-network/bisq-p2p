@@ -17,17 +17,19 @@
 
 package bisq.network.p2p.peers;
 
-import bisq.common.app.Log;
-import bisq.common.util.Utilities;
-import bisq.network.p2p.NodeAddress;
 import bisq.network.p2p.NodeAddress;
 import bisq.network.p2p.network.NetworkNode;
 import bisq.network.p2p.storage.messages.BroadcastMessage;
-import org.jetbrains.annotations.Nullable;
+
+import bisq.common.app.Log;
+import bisq.common.util.Utilities;
 
 import javax.inject.Inject;
+
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+
+import org.jetbrains.annotations.Nullable;
 
 public class Broadcaster implements BroadcastHandler.ResultHandler {
     private final NetworkNode networkNode;

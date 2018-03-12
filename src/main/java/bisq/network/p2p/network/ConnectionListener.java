@@ -17,7 +17,6 @@
 
 package bisq.network.p2p.network;
 
-
 public interface ConnectionListener {
     void onConnection(Connection connection);
 

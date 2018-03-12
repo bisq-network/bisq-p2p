@@ -18,7 +18,9 @@
 package bisq.network.p2p;
 
 import java.io.IOException;
+
 import java.net.ServerSocket;
+
 import java.util.Random;
 
 public class Utils {

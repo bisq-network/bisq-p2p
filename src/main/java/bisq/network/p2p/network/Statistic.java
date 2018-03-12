@@ -19,6 +19,7 @@ package bisq.network.p2p.network;
 
 import bisq.common.UserThread;
 import bisq.common.proto.network.NetworkEnvelope;
+
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleIntegerProperty;

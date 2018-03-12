@@ -17,12 +17,12 @@
 
 package bisq.network.crypto;
 
-
 import bisq.common.proto.network.NetworkEnvelope;
-import lombok.EqualsAndHashCode;
-import lombok.Value;
 
 import java.security.PublicKey;
+
+import lombok.EqualsAndHashCode;
+import lombok.Value;
 
 @EqualsAndHashCode
 @Value

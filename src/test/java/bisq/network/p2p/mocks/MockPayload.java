@@ -17,11 +17,13 @@
 
 package bisq.network.p2p.mocks;
 
+import bisq.network.p2p.storage.payload.ExpirablePayload;
+
 import bisq.common.app.Version;
 import bisq.common.proto.network.NetworkEnvelope;
-import bisq.network.p2p.storage.payload.ExpirablePayload;
+
 import io.bisq.generated.protobuffer.PB;
-import bisq.network.p2p.storage.payload.ExpirablePayload;
+
 import org.apache.commons.lang3.NotImplementedException;
 
 @SuppressWarnings("ALL")

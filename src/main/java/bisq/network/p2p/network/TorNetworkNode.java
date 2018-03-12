@@ -19,37 +19,50 @@ package bisq.network.p2p.network;
 
 import bisq.network.p2p.NodeAddress;
 import bisq.network.p2p.Utils;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.MoreExecutors;
-import com.runjva.sourceforge.jsocks.protocol.Socks5Proxy;
+
 import bisq.common.Timer;
 import bisq.common.UserThread;
 import bisq.common.app.Log;
 import bisq.common.proto.network.NetworkProtoResolver;
 import bisq.common.storage.FileUtil;
 import bisq.common.util.Utilities;
-import bisq.network.p2p.NodeAddress;
-import bisq.network.p2p.Utils;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import org.berndpruenster.netlayer.tor.*;
+
+import org.berndpruenster.netlayer.tor.HiddenServiceSocket;
+import org.berndpruenster.netlayer.tor.NativeTor;
+import org.berndpruenster.netlayer.tor.Tor;
+import org.berndpruenster.netlayer.tor.TorCtlException;
+import org.berndpruenster.netlayer.tor.TorSocket;
+
+import com.runjva.sourceforge.jsocks.protocol.Socks5Proxy;
+
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.MoreExecutors;
+
 import org.fxmisc.easybind.EasyBind;
 import org.fxmisc.easybind.monadic.MonadicBinding;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+
+import java.nio.file.Paths;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.net.Socket;
-import java.nio.file.Paths;
+
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 

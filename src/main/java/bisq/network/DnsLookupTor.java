@@ -18,14 +18,17 @@
 package bisq.network;
 
 import com.runjva.sourceforge.jsocks.protocol.Socks5Proxy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+
 import java.net.InetAddress;
 import java.net.Socket;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Performs DNS lookup over Socks5 proxy that implements the RESOLVE extension.

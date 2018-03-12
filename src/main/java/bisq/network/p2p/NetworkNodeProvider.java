@@ -17,16 +17,19 @@
 
 package bisq.network.p2p;
 
-import com.google.inject.Provider;
-import com.google.inject.name.Named;
-import bisq.common.proto.network.NetworkProtoResolver;
 import bisq.network.NetworkOptionKeys;
 import bisq.network.p2p.network.BridgeAddressProvider;
 import bisq.network.p2p.network.LocalhostNetworkNode;
 import bisq.network.p2p.network.NetworkNode;
 import bisq.network.p2p.network.TorNetworkNode;
 
+import bisq.common.proto.network.NetworkProtoResolver;
+
+import com.google.inject.Provider;
+import com.google.inject.name.Named;
+
 import javax.inject.Inject;
+
 import java.io.File;
 
 public class NetworkNodeProvider implements Provider<NetworkNode> {

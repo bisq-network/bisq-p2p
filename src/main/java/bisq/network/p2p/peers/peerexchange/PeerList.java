@@ -17,10 +17,12 @@
 
 package bisq.network.p2p.peers.peerexchange;
 
-import com.google.protobuf.Message;
 import bisq.common.proto.persistable.PersistableEnvelope;
 import bisq.common.proto.persistable.PersistableList;
+
 import io.bisq.generated.protobuffer.PB;
+
+import com.google.protobuf.Message;
 
 import java.util.ArrayList;
 import java.util.List;

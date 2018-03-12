@@ -17,20 +17,12 @@
 
 package bisq.network.p2p.network;
 
-import bisq.network.p2p.*;
-import bisq.network.p2p.peers.BanList;
-import com.google.common.util.concurrent.MoreExecutors;
-import com.google.common.util.concurrent.Uninterruptibles;
-import bisq.common.UserThread;
-import bisq.common.app.Capabilities;
-import bisq.common.app.Log;
-import bisq.common.app.Version;
-import bisq.common.proto.network.NetworkEnvelope;
-import bisq.common.proto.network.NetworkProtoResolver;
-import bisq.common.util.Tuple2;
-import bisq.common.util.Utilities;
-import io.bisq.generated.protobuffer.PB;
-import bisq.network.p2p.*;
+import bisq.network.p2p.CloseConnectionMessage;
+import bisq.network.p2p.ExtendedDataSizePermission;
+import bisq.network.p2p.NodeAddress;
+import bisq.network.p2p.PrefixedSealedAndSignedMessage;
+import bisq.network.p2p.SendersNodeAddressMessage;
+import bisq.network.p2p.SupportedCapabilitiesMessage;
 import bisq.network.p2p.peers.BanList;
 import bisq.network.p2p.peers.getdata.messages.GetDataRequest;
 import bisq.network.p2p.peers.getdata.messages.GetDataResponse;
@@ -43,24 +35,54 @@ import bisq.network.p2p.storage.messages.RefreshOfferMessage;
 import bisq.network.p2p.storage.payload.CapabilityRequiringPayload;
 import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
 import bisq.network.p2p.storage.payload.ProtectedStoragePayload;
+
+import bisq.common.UserThread;
+import bisq.common.app.Capabilities;
+import bisq.common.app.Log;
+import bisq.common.app.Version;
+import bisq.common.proto.network.NetworkEnvelope;
+import bisq.common.proto.network.NetworkProtoResolver;
+import bisq.common.util.Tuple2;
+import bisq.common.util.Utilities;
+
+import io.bisq.generated.protobuffer.PB;
+
+import com.google.common.util.concurrent.MoreExecutors;
+import com.google.common.util.concurrent.Uninterruptibles;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InvalidClassException;
+import java.io.OptionalDataException;
+import java.io.StreamCorruptedException;
+
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.jetbrains.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;

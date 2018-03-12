@@ -17,18 +17,6 @@
 
 package bisq.network.p2p.storage;
 
-import bisq.common.UserThread;
-import bisq.common.crypto.CryptoException;
-import bisq.common.crypto.KeyRing;
-import bisq.common.crypto.KeyStorage;
-import bisq.common.crypto.Sig;
-import bisq.common.storage.FileUtil;
-import bisq.network.p2p.NodeAddress;
-import bisq.network.p2p.TestUtils;
-import bisq.network.p2p.network.NetworkNode;
-import bisq.network.p2p.peers.PeerManager;
-import bisq.network.p2p.storage.messages.RefreshOfferMessage;
-import bisq.network.p2p.storage.payload.ProtectedStorageEntry;
 import bisq.network.crypto.EncryptionService;
 import bisq.network.p2p.NodeAddress;
 import bisq.network.p2p.P2PService;
@@ -38,21 +26,44 @@ import bisq.network.p2p.peers.PeerManager;
 import bisq.network.p2p.storage.messages.RefreshOfferMessage;
 import bisq.network.p2p.storage.mocks.MockData;
 import bisq.network.p2p.storage.payload.ProtectedStorageEntry;
+
+import bisq.common.UserThread;
+import bisq.common.crypto.CryptoException;
+import bisq.common.crypto.KeyRing;
+import bisq.common.crypto.KeyStorage;
+import bisq.common.crypto.Sig;
+import bisq.common.storage.FileUtil;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.junit.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.Security;
+import java.security.SignatureException;
+import java.security.cert.CertificateException;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.*;
-import java.security.cert.CertificateException;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 @Ignore
 public class ProtectedDataStorageTest {

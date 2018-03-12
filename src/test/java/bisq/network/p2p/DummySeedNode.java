@@ -17,27 +17,33 @@
 
 package bisq.network.p2p;
 
+import bisq.network.NetworkOptionKeys;
 import bisq.network.p2p.peers.BanList;
-import ch.qos.logback.classic.Level;
-import com.google.common.annotations.VisibleForTesting;
+
 import bisq.common.CommonOptionKeys;
 import bisq.common.UserThread;
 import bisq.common.app.Log;
 import bisq.common.app.Version;
 import bisq.common.util.Utilities;
-import bisq.network.NetworkOptionKeys;
-import bisq.network.p2p.peers.BanList;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.File;
+import com.google.common.annotations.VisibleForTesting;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import java.io.File;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.Level;
+
+import org.jetbrains.annotations.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 

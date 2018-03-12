@@ -17,9 +17,6 @@
 
 package bisq.network.p2p.messaging;
 
-
-import bisq.network.p2p.DecryptedMessageWithPubKey;
-import bisq.network.p2p.NodeAddress;
 import bisq.network.p2p.DecryptedMessageWithPubKey;
 import bisq.network.p2p.NodeAddress;
 

@@ -20,6 +20,7 @@ package bisq.network.p2p.storage.payload;
 import bisq.common.proto.ProtoResolver;
 import bisq.common.proto.network.NetworkPayload;
 import bisq.common.proto.persistable.PersistablePayload;
+
 import io.bisq.generated.protobuffer.PB;
 
 /**

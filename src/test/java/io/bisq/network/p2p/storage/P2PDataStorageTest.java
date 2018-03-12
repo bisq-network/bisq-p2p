@@ -1,11 +1,11 @@
 package io.bisq.network.p2p.storage;
 
-import io.bisq.common.crypto.CryptoException;
-import io.bisq.common.crypto.KeyRing;
-import io.bisq.common.crypto.KeyStorage;
-import io.bisq.common.proto.network.NetworkProtoResolver;
-import io.bisq.common.proto.persistable.PersistenceProtoResolver;
-import io.bisq.common.storage.FileUtil;
+import bisq.common.crypto.CryptoException;
+import bisq.common.crypto.KeyRing;
+import bisq.common.crypto.KeyStorage;
+import bisq.common.proto.network.NetworkProtoResolver;
+import bisq.common.proto.persistable.PersistenceProtoResolver;
+import bisq.common.storage.FileUtil;
 import io.bisq.network.crypto.EncryptionService;
 import io.bisq.network.p2p.NodeAddress;
 import io.bisq.network.p2p.TestUtils;

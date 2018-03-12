@@ -18,7 +18,7 @@
 package io.bisq.network.crypto;
 
 import com.google.inject.Singleton;
-import io.bisq.common.app.AppModule;
+import bisq.common.app.AppModule;
 import org.springframework.core.env.Environment;
 
 public class EncryptionServiceModule extends AppModule {

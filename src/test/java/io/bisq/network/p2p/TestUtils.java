@@ -1,11 +1,11 @@
 package io.bisq.network.p2p;
 
-import io.bisq.common.Payload;
-import io.bisq.common.proto.network.NetworkEnvelope;
-import io.bisq.common.proto.network.NetworkPayload;
-import io.bisq.common.proto.network.NetworkProtoResolver;
-import io.bisq.common.proto.persistable.PersistableEnvelope;
-import io.bisq.common.proto.persistable.PersistenceProtoResolver;
+import bisq.common.Payload;
+import bisq.common.proto.network.NetworkEnvelope;
+import bisq.common.proto.network.NetworkPayload;
+import bisq.common.proto.network.NetworkProtoResolver;
+import bisq.common.proto.persistable.PersistableEnvelope;
+import bisq.common.proto.persistable.PersistenceProtoResolver;
 import io.bisq.generated.protobuffer.PB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

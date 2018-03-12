@@ -1,9 +1,9 @@
 package io.bisq.network.p2p;
 
 import com.google.protobuf.ByteString;
-import io.bisq.common.app.Version;
-import io.bisq.common.crypto.SealedAndSigned;
-import io.bisq.common.proto.network.NetworkEnvelope;
+import bisq.common.app.Version;
+import bisq.common.crypto.SealedAndSigned;
+import bisq.common.proto.network.NetworkEnvelope;
 import io.bisq.generated.protobuffer.PB;
 import lombok.EqualsAndHashCode;
 import lombok.Value;

@@ -18,8 +18,8 @@
 package io.bisq.network.p2p.storage;
 
 import com.google.protobuf.Message;
-import io.bisq.common.proto.network.NetworkProtoResolver;
-import io.bisq.common.proto.persistable.PersistableEnvelope;
+import bisq.common.proto.network.NetworkProtoResolver;
+import bisq.common.proto.persistable.PersistableEnvelope;
 import io.bisq.generated.protobuffer.PB;
 import io.bisq.network.p2p.storage.payload.ProtectedStorageEntry;
 import lombok.Getter;

@@ -1,7 +1,7 @@
 package io.bisq.network.p2p.storage.messages;
 
-import io.bisq.common.app.Version;
-import io.bisq.common.proto.network.NetworkProtoResolver;
+import bisq.common.app.Version;
+import bisq.common.proto.network.NetworkProtoResolver;
 import io.bisq.generated.protobuffer.PB;
 import io.bisq.network.p2p.storage.payload.ProtectedMailboxStorageEntry;
 import lombok.EqualsAndHashCode;

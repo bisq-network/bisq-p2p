@@ -18,7 +18,7 @@
 package io.bisq.network.crypto;
 
 
-import io.bisq.common.proto.network.NetworkEnvelope;
+import bisq.common.proto.network.NetworkEnvelope;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 

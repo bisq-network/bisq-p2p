@@ -1,8 +1,8 @@
 package io.bisq.network.p2p.network;
 
-import io.bisq.common.UserThread;
-import io.bisq.common.app.Log;
-import io.bisq.common.proto.network.NetworkProtoResolver;
+import bisq.common.UserThread;
+import bisq.common.app.Log;
+import bisq.common.proto.network.NetworkProtoResolver;
 import io.bisq.network.p2p.NodeAddress;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;

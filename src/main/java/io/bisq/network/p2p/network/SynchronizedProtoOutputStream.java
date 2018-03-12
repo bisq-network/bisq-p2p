@@ -17,7 +17,7 @@
 
 package io.bisq.network.p2p.network;
 
-import io.bisq.common.proto.network.NetworkEnvelope;
+import bisq.common.proto.network.NetworkEnvelope;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

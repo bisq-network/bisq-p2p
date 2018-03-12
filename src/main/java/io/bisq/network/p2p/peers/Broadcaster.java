@@ -1,7 +1,7 @@
 package io.bisq.network.p2p.peers;
 
-import io.bisq.common.app.Log;
-import io.bisq.common.util.Utilities;
+import bisq.common.app.Log;
+import bisq.common.util.Utilities;
 import io.bisq.network.p2p.NodeAddress;
 import io.bisq.network.p2p.network.NetworkNode;
 import io.bisq.network.p2p.storage.messages.BroadcastMessage;

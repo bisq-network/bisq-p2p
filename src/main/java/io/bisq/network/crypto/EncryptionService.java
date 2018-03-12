@@ -18,9 +18,9 @@
 package io.bisq.network.crypto;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import io.bisq.common.crypto.*;
-import io.bisq.common.proto.network.NetworkEnvelope;
-import io.bisq.common.proto.network.NetworkProtoResolver;
+import bisq.common.crypto.*;
+import bisq.common.proto.network.NetworkEnvelope;
+import bisq.common.proto.network.NetworkProtoResolver;
 import io.bisq.generated.protobuffer.PB;
 import io.bisq.network.p2p.DecryptedMessageWithPubKey;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-import static io.bisq.common.crypto.Encryption.decryptSecretKey;
+import static bisq.common.crypto.Encryption.decryptSecretKey;
 
 @Slf4j
 public class EncryptionService {

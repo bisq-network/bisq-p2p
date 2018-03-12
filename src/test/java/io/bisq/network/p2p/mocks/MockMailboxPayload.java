@@ -1,7 +1,7 @@
 package io.bisq.network.p2p.mocks;
 
-import io.bisq.common.app.Version;
-import io.bisq.common.proto.network.NetworkEnvelope;
+import bisq.common.app.Version;
+import bisq.common.proto.network.NetworkEnvelope;
 import io.bisq.generated.protobuffer.PB;
 import io.bisq.network.p2p.MailboxMessage;
 import io.bisq.network.p2p.NodeAddress;

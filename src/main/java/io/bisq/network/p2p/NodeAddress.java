@@ -1,10 +1,10 @@
 package io.bisq.network.p2p;
 
-import io.bisq.common.consensus.UsedForTradeContractJson;
-import io.bisq.common.crypto.Hash;
-import io.bisq.common.proto.network.NetworkPayload;
-import io.bisq.common.proto.persistable.PersistablePayload;
-import io.bisq.common.util.JsonExclude;
+import bisq.common.consensus.UsedForTradeContractJson;
+import bisq.common.crypto.Hash;
+import bisq.common.proto.network.NetworkPayload;
+import bisq.common.proto.persistable.PersistablePayload;
+import bisq.common.util.JsonExclude;
 import io.bisq.generated.protobuffer.PB;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

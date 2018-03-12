@@ -1,13 +1,13 @@
 package io.bisq.network.p2p.peers;
 
 import com.google.inject.name.Named;
-import io.bisq.common.Clock;
-import io.bisq.common.Timer;
-import io.bisq.common.UserThread;
-import io.bisq.common.app.Log;
-import io.bisq.common.proto.persistable.PersistedDataHost;
-import io.bisq.common.proto.persistable.PersistenceProtoResolver;
-import io.bisq.common.storage.Storage;
+import bisq.common.Clock;
+import bisq.common.Timer;
+import bisq.common.UserThread;
+import bisq.common.app.Log;
+import bisq.common.proto.persistable.PersistedDataHost;
+import bisq.common.proto.persistable.PersistenceProtoResolver;
+import bisq.common.storage.Storage;
 import io.bisq.network.NetworkOptionKeys;
 import io.bisq.network.p2p.NodeAddress;
 import io.bisq.network.p2p.network.*;

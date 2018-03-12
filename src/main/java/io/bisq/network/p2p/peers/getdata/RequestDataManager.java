@@ -1,10 +1,10 @@
 package io.bisq.network.p2p.peers.getdata;
 
 import com.google.inject.name.Named;
-import io.bisq.common.Timer;
-import io.bisq.common.UserThread;
-import io.bisq.common.app.Log;
-import io.bisq.common.proto.network.NetworkEnvelope;
+import bisq.common.Timer;
+import bisq.common.UserThread;
+import bisq.common.app.Log;
+import bisq.common.proto.network.NetworkEnvelope;
 import io.bisq.network.NetworkOptionKeys;
 import io.bisq.network.p2p.NodeAddress;
 import io.bisq.network.p2p.network.*;

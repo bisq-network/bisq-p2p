@@ -19,7 +19,7 @@ package io.bisq.network.p2p;
 
 import com.google.inject.Singleton;
 import com.google.inject.name.Names;
-import io.bisq.common.app.AppModule;
+import bisq.common.app.AppModule;
 import io.bisq.network.NetworkOptionKeys;
 import io.bisq.network.Socks5ProxyProvider;
 import io.bisq.network.p2p.network.NetworkNode;

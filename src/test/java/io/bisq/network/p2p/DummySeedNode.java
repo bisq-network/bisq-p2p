@@ -2,11 +2,11 @@ package io.bisq.network.p2p;
 
 import ch.qos.logback.classic.Level;
 import com.google.common.annotations.VisibleForTesting;
-import io.bisq.common.CommonOptionKeys;
-import io.bisq.common.UserThread;
-import io.bisq.common.app.Log;
-import io.bisq.common.app.Version;
-import io.bisq.common.util.Utilities;
+import bisq.common.CommonOptionKeys;
+import bisq.common.UserThread;
+import bisq.common.app.Log;
+import bisq.common.app.Version;
+import bisq.common.util.Utilities;
 import io.bisq.network.NetworkOptionKeys;
 import io.bisq.network.p2p.peers.BanList;
 import org.jetbrains.annotations.Nullable;

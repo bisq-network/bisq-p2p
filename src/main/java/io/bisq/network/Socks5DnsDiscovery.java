@@ -18,7 +18,7 @@
 package io.bisq.network;
 
 import com.runjva.sourceforge.jsocks.protocol.Socks5Proxy;
-import io.bisq.common.util.Utilities;
+import bisq.common.util.Utilities;
 import lombok.extern.slf4j.Slf4j;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.net.discovery.DnsDiscovery;

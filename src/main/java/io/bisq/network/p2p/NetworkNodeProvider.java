@@ -19,7 +19,7 @@ package io.bisq.network.p2p;
 
 import com.google.inject.Provider;
 import com.google.inject.name.Named;
-import io.bisq.common.proto.network.NetworkProtoResolver;
+import bisq.common.proto.network.NetworkProtoResolver;
 import io.bisq.network.NetworkOptionKeys;
 import io.bisq.network.p2p.network.BridgeAddressProvider;
 import io.bisq.network.p2p.network.LocalhostNetworkNode;

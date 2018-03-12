@@ -2,10 +2,10 @@ package io.bisq.network.p2p.storage.payload;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import io.bisq.common.crypto.Sig;
-import io.bisq.common.proto.network.NetworkPayload;
-import io.bisq.common.proto.network.NetworkProtoResolver;
-import io.bisq.common.proto.persistable.PersistablePayload;
+import bisq.common.crypto.Sig;
+import bisq.common.proto.network.NetworkPayload;
+import bisq.common.proto.network.NetworkProtoResolver;
+import bisq.common.proto.persistable.PersistablePayload;
 import io.bisq.generated.protobuffer.PB;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

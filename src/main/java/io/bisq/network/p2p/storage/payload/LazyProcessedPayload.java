@@ -1,6 +1,6 @@
 package io.bisq.network.p2p.storage.payload;
 
-import io.bisq.common.Payload;
+import bisq.common.Payload;
 
 /**
  * Marker interface for payload which gets delayed processed at startup so we don't hit performance too much.

@@ -1,7 +1,7 @@
 package io.bisq.network.http;
 
 import com.runjva.sourceforge.jsocks.protocol.Socks5Proxy;
-import io.bisq.common.app.Version;
+import bisq.common.app.Version;
 import io.bisq.network.Socks5ProxyProvider;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

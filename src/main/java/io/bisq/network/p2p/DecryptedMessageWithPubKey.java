@@ -17,7 +17,7 @@
 
 package io.bisq.network.p2p;
 
-import io.bisq.common.proto.network.NetworkEnvelope;
+import bisq.common.proto.network.NetworkEnvelope;
 import lombok.Value;
 
 import java.security.PublicKey;

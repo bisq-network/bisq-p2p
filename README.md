@@ -1,1 +1,1 @@
-# bisq-common
+# bisq-p2p

@@ -1,0 +1,17 @@
+package bisq.network.p2p.network;
+
+import bisq.common.proto.network.NetworkProtoResolver;
+import bisq.network.p2p.NodeAddress;
+import bisq.network.p2p.NodeAddress;
+
+import java.net.Socket;
+
+public class OutboundConnection extends Connection {
+    public OutboundConnection(Socket socket,
+                              MessageListener messageListener,
+                              ConnectionListener connectionListener,
+                              NodeAddress peersNodeAddress,
+                              NetworkProtoResolver networkProtoResolver) {
+        super(socket, messageListener, connectionListener, peersNodeAddress, networkProtoResolver);
+    }
+}

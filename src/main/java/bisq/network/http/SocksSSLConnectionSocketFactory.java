@@ -21,13 +21,13 @@ import org.apache.http.HttpHost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.protocol.HttpContext;
 
-import java.io.IOException;
-
 import javax.net.ssl.SSLContext;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.Socket;
+
+import java.io.IOException;
 
 // This class is adapted from
 //   http://stackoverflow.com/a/25203021/5616248

@@ -23,10 +23,10 @@ import bisq.common.UserThread;
 import bisq.common.app.Log;
 import bisq.common.proto.network.NetworkProtoResolver;
 
-import java.io.IOException;
-
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import java.io.IOException;
 
 import java.util.concurrent.TimeUnit;
 

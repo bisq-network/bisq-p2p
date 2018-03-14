@@ -54,16 +54,16 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InvalidClassException;
 import java.io.OptionalDataException;
 import java.io.StreamCorruptedException;
-
-import java.net.Socket;
-import java.net.SocketException;
-import java.net.SocketTimeoutException;
 
 import java.util.ArrayList;
 import java.util.List;

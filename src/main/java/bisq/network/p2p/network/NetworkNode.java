@@ -37,11 +37,11 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-import java.io.IOException;
-
 import java.net.ConnectException;
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import java.io.IOException;
 
 import java.util.HashSet;
 import java.util.Optional;

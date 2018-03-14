@@ -19,10 +19,10 @@ package bisq.network;
 
 import com.runjva.sourceforge.jsocks.protocol.Socks5Proxy;
 
-import java.io.IOException;
-
 import java.net.InetAddress;
 import java.net.Socket;
+
+import java.io.IOException;
 
 import java.util.HashMap;
 import java.util.Map;

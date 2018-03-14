@@ -20,11 +20,11 @@ package bisq.network.p2p.network;
 import bisq.common.app.Log;
 import bisq.common.proto.network.NetworkProtoResolver;
 
-import java.io.IOException;
-
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+
+import java.io.IOException;
 
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;

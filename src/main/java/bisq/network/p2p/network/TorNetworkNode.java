@@ -46,12 +46,12 @@ import org.fxmisc.easybind.monadic.MonadicBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
+import java.net.Socket;
+
 import java.nio.file.Paths;
 
 import java.io.File;
 import java.io.IOException;
-
-import java.net.Socket;
 
 import java.util.Date;
 import java.util.List;

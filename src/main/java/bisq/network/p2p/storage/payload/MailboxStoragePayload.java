@@ -50,7 +50,7 @@ import javax.annotation.Nullable;
 @Getter
 @EqualsAndHashCode
 @Slf4j
-public final class MailboxStoragePayload implements ProtectedStoragePayload {
+public final class MailboxStoragePayload implements ProtectedStoragePayload, ExpirablePayload {
     private final PrefixedSealedAndSignedMessage prefixedSealedAndSignedMessage;
     private PublicKey senderPubKeyForAddOperation;
     private final byte[] senderPubKeyForAddOperationBytes;

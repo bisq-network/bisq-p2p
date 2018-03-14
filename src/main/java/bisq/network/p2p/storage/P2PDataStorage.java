@@ -275,17 +275,16 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     public void onDisconnect(CloseConnectionReason closeConnectionReason, Connection connection) {
         if (connection.hasPeersNodeAddress() && !closeConnectionReason.isIntended) {
             map.values().stream()
-                    .forEach(protectedData -> {
-                        ExpirablePayload expirablePayload = protectedData.getProtectedStoragePayload();
-                        if (expirablePayload instanceof RequiresOwnerIsOnlinePayload) {
-                            RequiresOwnerIsOnlinePayload requiresOwnerIsOnlinePayload = (RequiresOwnerIsOnlinePayload) expirablePayload;
-                            NodeAddress ownerNodeAddress = requiresOwnerIsOnlinePayload.getOwnerNodeAddress();
+                    .forEach(protectedStorageEntry -> {
+                        NetworkPayload networkPayload = protectedStorageEntry.getProtectedStoragePayload();
+                        if (networkPayload instanceof ExpirablePayload && networkPayload instanceof RequiresOwnerIsOnlinePayload) {
+                            NodeAddress ownerNodeAddress = ((RequiresOwnerIsOnlinePayload) networkPayload).getOwnerNodeAddress();
                             if (ownerNodeAddress.equals(connection.getPeersNodeAddressOptional().get())) {
                                 // We have a RequiresLiveOwnerData data object with the node address of the
                                 // disconnected peer. We remove that data from our map.
 
                                 // Check if we have the data (e.g. OfferPayload)
-                                ByteArray hashOfPayload = getHashAsByteArray(expirablePayload);
+                                ByteArray hashOfPayload = getHashAsByteArray(networkPayload);
                                 boolean containsKey = map.containsKey(hashOfPayload);
                                 if (containsKey) {
                                     log.debug("We remove the data as the data owner got disconnected with " +
@@ -306,11 +305,11 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
                                     // test set up (many nodes/connections over 1 router)
                                     // TODO investigate what causes the disconnections.
                                     // Usually the are: SOCKET_TIMEOUT ,TERMINATED (EOFException)
-                                    protectedData.backDate();
-                                    if (protectedData.isExpired()) {
+                                    protectedStorageEntry.backDate();
+                                    if (protectedStorageEntry.isExpired()) {
                                         log.info("We found an expired data entry which we have already back dated. " +
-                                                "We remove the protectedStoragePayload:\n\t" + Utilities.toTruncatedString(protectedData.getProtectedStoragePayload(), 100));
-                                        doRemoveProtectedExpirableData(protectedData, hashOfPayload);
+                                                "We remove the protectedStoragePayload:\n\t" + Utilities.toTruncatedString(protectedStorageEntry.getProtectedStoragePayload(), 100));
+                                        doRemoveProtectedExpirableData(protectedStorageEntry, hashOfPayload);
                                     }
                                 } else {
                                     log.debug("Remove data ignored as we don't have an entry for that data.");
@@ -720,7 +719,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
         broadcaster.broadcast(message, sender, listener, isDataOwner);
     }
 
-    private ByteArray getHashAsByteArray(ExpirablePayload data) {
+    private ByteArray getHashAsByteArray(NetworkPayload data) {
         return new ByteArray(P2PDataStorage.getHash(data));
     }
 

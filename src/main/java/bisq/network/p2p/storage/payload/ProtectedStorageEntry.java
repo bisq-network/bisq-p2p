@@ -113,7 +113,8 @@ public class ProtectedStorageEntry implements NetworkPayload, PersistablePayload
     }
 
     public void backDate() {
-        creationTimeStamp -= protectedStoragePayload.getTTL() / 2;
+        if (protectedStoragePayload instanceof ExpirablePayload)
+            creationTimeStamp -= ((ExpirablePayload) protectedStoragePayload).getTTL() / 2;
     }
 
     public void updateSequenceNumber(int sequenceNumber) {
@@ -125,8 +126,7 @@ public class ProtectedStorageEntry implements NetworkPayload, PersistablePayload
     }
 
     public boolean isExpired() {
-        return (System.currentTimeMillis() - creationTimeStamp) > protectedStoragePayload.getTTL();
+        return protectedStoragePayload instanceof ExpirablePayload &&
+                (System.currentTimeMillis() - creationTimeStamp) > ((ExpirablePayload) protectedStoragePayload).getTTL();
     }
-
-
 }

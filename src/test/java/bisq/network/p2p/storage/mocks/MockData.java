@@ -17,6 +17,7 @@
 
 package bisq.network.p2p.storage.mocks;
 
+import bisq.network.p2p.storage.payload.ExpirablePayload;
 import bisq.network.p2p.storage.payload.ProtectedStoragePayload;
 
 import io.bisq.generated.protobuffer.PB;
@@ -30,7 +31,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 @SuppressWarnings("ALL")
-public class MockData implements ProtectedStoragePayload {
+public class MockData implements ProtectedStoragePayload, ExpirablePayload {
     public final String msg;
     public final PublicKey publicKey;
     public long ttl;

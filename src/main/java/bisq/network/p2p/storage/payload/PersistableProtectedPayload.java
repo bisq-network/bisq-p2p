@@ -24,9 +24,6 @@ import io.bisq.generated.protobuffer.PB;
 
 /**
  * ProtectedStoragePayload which are persistable and removable
- * <p/>
- * Implementations:
- * io.bisq.alert.Alert
  */
 public interface PersistableProtectedPayload extends ProtectedStoragePayload, PersistablePayload {
 

@@ -45,6 +45,6 @@ public class BanList {
     @Inject
     public BanList(@Named(NetworkOptionKeys.BAN_LIST) String banList) {
         if (banList != null && !banList.isEmpty())
-            BanList.list =Arrays.asList(StringUtils.deleteWhitespace(banList).split(",")).stream().map(NodeAddress::new).collect(Collectors.toList());
+            BanList.list = Arrays.asList(StringUtils.deleteWhitespace(banList).split(",")).stream().map(NodeAddress::new).collect(Collectors.toList());
     }
 }

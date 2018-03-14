@@ -61,7 +61,7 @@ public class Broadcaster implements BroadcastHandler.ResultHandler {
     public void broadcast(BroadcastMessage message, @Nullable NodeAddress sender,
                           @Nullable BroadcastHandler.Listener listener, boolean isDataOwner) {
         Log.traceCall("Sender=" + sender + "\n\t" +
-            "Message=" + Utilities.toTruncatedString(message));
+                "Message=" + Utilities.toTruncatedString(message));
 
         BroadcastHandler broadcastHandler = new BroadcastHandler(networkNode, peerManager);
         broadcastHandler.broadcast(message, sender, this, listener, isDataOwner);

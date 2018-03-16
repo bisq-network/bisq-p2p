@@ -89,18 +89,19 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.Nullable;
 
-// Run in UserThread
+@Slf4j
 public class P2PDataStorage implements MessageListener, ConnectionListener, PersistedDataHost {
-    private static final Logger log = LoggerFactory.getLogger(P2PDataStorage.class);
+    public static final String PERSISTABLE_NETWORK_PAYLOAD_MAP_FILE_NAME = "PersistableNetworkPayloadMap";
+    public static final String PERSISTED_ENTRY_MAP_FILE_NAME = "PersistedEntryMap";
 
     /**
      * How many days to keep an entry before it is purged.
@@ -122,9 +123,14 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     private final SequenceNumberMap sequenceNumberMap = new SequenceNumberMap();
 
     @Getter
-    private PersistableNetworkPayloadCollection persistableNetworkPayloadCollection;
-    private final Storage<PersistableNetworkPayloadCollection> persistableNetworkPayloadMapStorage;
+    private PersistableNetworkPayloadList persistableNetworkPayloadList;
+    private final Storage<PersistableNetworkPayloadList> persistableNetworkPayloadMapStorage;
     private final CopyOnWriteArraySet<PersistableNetworkPayloadMapListener> persistableNetworkPayloadMapListeners = new CopyOnWriteArraySet<>();
+
+    @Getter
+    private PersistedEntryMap persistedEntryMap;
+    private final Storage<PersistedEntryMap> persistedEntryMapStorage;
+    private final CopyOnWriteArraySet<PersistedEntryMapListener> persistedEntryMapListeners = new CopyOnWriteArraySet<>();
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -147,6 +153,9 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
 
         persistableNetworkPayloadMapStorage = new Storage<>(storageDir, persistenceProtoResolver);
         persistableNetworkPayloadMapStorage.setNumMaxBackupFiles(1);
+
+        persistedEntryMapStorage = new Storage<>(storageDir, persistenceProtoResolver);
+        persistedEntryMapStorage.setNumMaxBackupFiles(1);
     }
 
     @Override
@@ -155,14 +164,15 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
         if (persistedSequenceNumberMap != null)
             sequenceNumberMap.setMap(getPurgedSequenceNumberMap(persistedSequenceNumberMap.getMap()));
 
-        // PersistedEntryMap cannot be set here as we dont know yet the selected base currency
-        // We get it called in readEntryMapFromResources once ready
+        // PersistableNetworkPayloadMap and PersistedEntryMap cannot be set here as we don't know yet the selected
+        // base currency which is used to keep the resource files separated per base currency.
+        // We get it called in readFromResources once ready.
     }
 
     // This method is called at startup in a non-user thread.
     // We should not have any threading issues here as the p2p network is just initializing
-    public synchronized void readFromResources(String resourceFileName) {
-        final String storageFileName = "PersistableNetworkPayloadMap";
+    public synchronized void readFromResources(String storageFileName, String postFix) {
+        String resourceFileName = storageFileName + postFix;
         File dbDir = new File(storageDir.getAbsolutePath());
         if (!dbDir.exists() && !dbDir.mkdir())
             log.warn("make dir failed.\ndbDir=" + dbDir.getAbsolutePath());
@@ -182,16 +192,33 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
         } else {
             log.debug(storageFileName + " file exists already.");
         }
-        persistableNetworkPayloadCollection = persistableNetworkPayloadMapStorage.initAndGetPersistedWithFileName(storageFileName, 100);
-        if (persistableNetworkPayloadCollection != null) {
-            log.info("persistableNetworkPayloadMap size=" + persistableNetworkPayloadCollection.getMap().size());
 
-            // In case another object is already listening...
-            if (!persistableNetworkPayloadMapListeners.isEmpty())
-                persistableNetworkPayloadCollection.getMap().values().stream()
-                        .forEach(payload -> persistableNetworkPayloadMapListeners.stream().forEach(e -> e.onAdded(payload)));
-        } else {
-            persistableNetworkPayloadCollection = new PersistableNetworkPayloadCollection();
+        if (storageFileName.equals(PERSISTABLE_NETWORK_PAYLOAD_MAP_FILE_NAME)) {
+            persistableNetworkPayloadList = persistableNetworkPayloadMapStorage.initAndGetPersistedWithFileName(storageFileName, 100);
+            if (persistableNetworkPayloadList != null) {
+                log.info(storageFileName + " size=" + persistableNetworkPayloadList.getMap().size());
+
+                if (!persistableNetworkPayloadMapListeners.isEmpty()) {
+                    persistableNetworkPayloadList.getMap().values()
+                            .forEach(payload -> persistableNetworkPayloadMapListeners.forEach(e -> e.onAdded(payload)));
+                }
+            } else {
+                persistableNetworkPayloadList = new PersistableNetworkPayloadList();
+            }
+        } else if (storageFileName.equals(PERSISTED_ENTRY_MAP_FILE_NAME)) {
+            persistedEntryMap = persistedEntryMapStorage.initAndGetPersistedWithFileName(storageFileName, 100);
+            if (persistedEntryMap != null) {
+                log.info(storageFileName + " size=" + persistedEntryMap.getMap().size());
+
+                map.putAll(persistedEntryMap.getMap());
+
+                if (!persistedEntryMapListeners.isEmpty()) {
+                    persistedEntryMap.getMap().values()
+                            .forEach(protectedStorageEntry -> persistedEntryMapListeners.forEach(e -> e.onAdded(protectedStorageEntry)));
+                }
+            } else {
+                persistedEntryMap = new PersistedEntryMap();
+            }
         }
     }
 
@@ -227,8 +254,8 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
                         }
                     });
 
-            toRemoveSet.stream().forEach(
-                    protectedDataToRemove -> hashMapChangedListeners.stream().forEach(
+            toRemoveSet.forEach(
+                    protectedDataToRemove -> hashMapChangedListeners.forEach(
                             listener -> listener.onRemoved(protectedDataToRemove)));
 
             if (sequenceNumberMap.size() > 1000)
@@ -274,7 +301,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     @Override
     public void onDisconnect(CloseConnectionReason closeConnectionReason, Connection connection) {
         if (connection.hasPeersNodeAddress() && !closeConnectionReason.isIntended) {
-            map.values().stream()
+            map.values()
                     .forEach(protectedStorageEntry -> {
                         NetworkPayload networkPayload = protectedStorageEntry.getProtectedStoragePayload();
                         if (networkPayload instanceof ExpirablePayload && networkPayload instanceof RequiresOwnerIsOnlinePayload) {
@@ -340,13 +367,13 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
         final byte[] hash = payload.getHash();
         if (payload.verifyHashSize()) {
             final ByteArray hashAsByteArray = new ByteArray(hash);
-            boolean containsKey = persistableNetworkPayloadCollection.getMap().containsKey(hashAsByteArray);
+            boolean containsKey = persistableNetworkPayloadList.getMap().containsKey(hashAsByteArray);
             if (!containsKey || reBroadcast) {
                 if (!(payload instanceof DateTolerantPayload) || !checkDate || ((DateTolerantPayload) payload).isDateInTolerance()) {
                     if (!containsKey) {
-                        persistableNetworkPayloadCollection.getMap().put(hashAsByteArray, payload);
-                        persistableNetworkPayloadMapStorage.queueUpForSave(persistableNetworkPayloadCollection, 2000);
-                        persistableNetworkPayloadMapListeners.stream().forEach(e -> e.onAdded(payload));
+                        persistableNetworkPayloadList.getMap().put(hashAsByteArray, payload);
+                        persistableNetworkPayloadMapStorage.queueUpForSave(persistableNetworkPayloadList, 2000);
+                        persistableNetworkPayloadMapListeners.forEach(e -> e.onAdded(payload));
                     }
                     if (allowBroadcast)
                         broadcaster.broadcast(new AddPersistableNetworkPayloadMessage(payload), sender, null, isDataOwner);
@@ -410,6 +437,17 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
             } else {
                 log.trace("We got that version of the data already, so we don't broadcast it.");
             }
+
+            if (protectedStoragePayload instanceof PersistablePayload &&
+                    !persistedEntryMap.getMap().containsKey(hashOfPayload)) {
+                persistedEntryMap.getMap().put(hashOfPayload, protectedStorageEntry);
+
+                persistedEntryMapListeners.forEach(e -> e.onAdded(protectedStorageEntry));
+
+                persistedEntryMapStorage.queueUpForSave(persistedEntryMap, 200);
+            } else {
+                log.info("We do not add the protectedStorageEntry to the persistedEntryMap as it does already exist.");
+            }
         } else {
             log.trace("add failed");
         }
@@ -462,7 +500,8 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
 
     public boolean remove(ProtectedStorageEntry protectedStorageEntry, @Nullable NodeAddress sender, boolean isDataOwner) {
         Log.traceCall();
-        ByteArray hashOfPayload = getHashAsByteArray(protectedStorageEntry.getProtectedStoragePayload());
+        final ProtectedStoragePayload protectedStoragePayload = protectedStorageEntry.getProtectedStoragePayload();
+        ByteArray hashOfPayload = getHashAsByteArray(protectedStoragePayload);
         boolean containsKey = map.containsKey(hashOfPayload);
         if (!containsKey)
             log.debug("Remove data ignored as we don't have an entry for that data.");
@@ -480,6 +519,17 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
             sequenceNumberMapStorage.queueUpForSave(SequenceNumberMap.clone(sequenceNumberMap), 300);
 
             broadcast(new RemoveDataMessage(protectedStorageEntry), sender, null, isDataOwner);
+
+            if (protectedStoragePayload instanceof PersistablePayload &&
+                    persistedEntryMap.getMap().containsKey(hashOfPayload)) {
+                persistedEntryMap.getMap().remove(hashOfPayload);
+
+                persistedEntryMapListeners.forEach(e -> e.onRemoved(protectedStorageEntry));
+
+                persistedEntryMapStorage.queueUpForSave(persistedEntryMap, 200);
+            } else {
+                log.info("We cannot remove the protectedStorageEntry from the persistedEntryMap as it does not exist.");
+            }
         } else {
             log.debug("remove failed");
         }
@@ -572,6 +622,14 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
 
     public void removePersistableNetworkPayloadMapListener(PersistableNetworkPayloadMapListener listener) {
         persistableNetworkPayloadMapListeners.remove(listener);
+    }
+
+    public void addPersistedEntryMapListener(PersistedEntryMapListener listener) {
+        persistedEntryMapListeners.add(listener);
+    }
+
+    public void removePersistedEntryMapListener(PersistedEntryMapListener listener) {
+        persistedEntryMapListeners.remove(listener);
     }
 
 

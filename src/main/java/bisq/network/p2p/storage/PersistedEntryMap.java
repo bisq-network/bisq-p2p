@@ -41,10 +41,15 @@ public class PersistedEntryMap implements PersistableEnvelope {
     @Getter
     private Map<P2PDataStorage.ByteArray, ProtectedStorageEntry> map = new ConcurrentHashMap<>();
 
-    public PersistedEntryMap() {
+    PersistedEntryMap() {
     }
 
-    public PersistedEntryMap(Map<P2PDataStorage.ByteArray, ProtectedStorageEntry> map) {
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // PROTO BUFFER
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
+    private PersistedEntryMap(Map<P2PDataStorage.ByteArray, ProtectedStorageEntry> map) {
         this.map.putAll(map);
     }
 
@@ -72,6 +77,11 @@ public class PersistedEntryMap implements PersistableEnvelope {
                 ));
         return new PersistedEntryMap(new HashMap<>(map));
     }
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // API
+    ///////////////////////////////////////////////////////////////////////////////////////////
 
     public void put(P2PDataStorage.ByteArray key, ProtectedStorageEntry value) {
         map.put(key, value);

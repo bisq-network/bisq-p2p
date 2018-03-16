@@ -32,7 +32,6 @@ import bisq.network.p2p.storage.payload.ProtectedStoragePayload;
 import bisq.common.Timer;
 import bisq.common.UserThread;
 import bisq.common.app.Log;
-import bisq.common.proto.persistable.PersistablePayload;
 import bisq.common.util.Utilities;
 
 import com.google.common.util.concurrent.FutureCallback;
@@ -141,7 +140,7 @@ public class GetDataRequestHandler {
         final Set<P2PDataStorage.ByteArray> tempLookupSet = new HashSet<>();
         Set<P2PDataStorage.ByteArray> excludedKeysAsByteArray = P2PDataStorage.ByteArray.convertBytesSetToByteArraySet(getDataRequest.getExcludedKeys());
 
-        return dataStorage.getPersistableNetworkPayloadCollection().getMap().entrySet().stream()
+        return dataStorage.getPersistableNetworkPayloadList().getMap().entrySet().stream()
                 .filter(e -> !excludedKeysAsByteArray.contains(e.getKey()))
                 .map(Map.Entry::getValue)
                 .filter(payload -> (!(payload instanceof CapabilityRequiringPayload) ||
@@ -189,13 +188,7 @@ public class GetDataRequestHandler {
                 doAdd = true;
             }
             if (doAdd) {
-                boolean notContained = lookupSet.add(protectedStoragePayload.hashCode());
-                // We want to ignore TradeStatistics but the class it not known in network module so we use PersistablePayload
-                // as it was the only protectedStoragePayload object implementing PersistablePayload.
-                // CompensationRequestPayload was the other class but once we impl. that we don't need
-                // to support the old TradeStatistics data anymore...
-                //TODO PersistablePayload check can be removed once old TradeStatistics are not supported anymore
-                if (notContained && !(protectedStoragePayload instanceof PersistablePayload))
+                if (lookupSet.add(protectedStoragePayload.hashCode()))
                     filteredDataSet.add(protectedStorageEntry);
             }
         }

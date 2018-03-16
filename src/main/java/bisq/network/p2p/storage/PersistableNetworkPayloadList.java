@@ -38,12 +38,15 @@ import lombok.extern.slf4j.Slf4j;
 // That class wraps a map but is represented in PB as a list to reduce data size (no key).
 // PB also does not support a byte array as key and would require some quirks to support such a map (using hex string
 // would render our 20 byte keys to 40 bytes as HEX encoded).
+// The class name should be map not list but we want to stick with the PB definition name and that cannot be changed
+// without breaking backward compatibility.
+// TODO at next hard fork we can rename the PB definition and class name.
 @Slf4j
-public class PersistableNetworkPayloadCollection implements PersistableEnvelope {
+public class PersistableNetworkPayloadList implements PersistableEnvelope {
     @Getter
     private Map<P2PDataStorage.ByteArray, PersistableNetworkPayload> map = new ConcurrentHashMap<>();
 
-    public PersistableNetworkPayloadCollection() {
+    PersistableNetworkPayloadList() {
     }
 
 
@@ -51,7 +54,7 @@ public class PersistableNetworkPayloadCollection implements PersistableEnvelope 
     // PROTO BUFFER
     ///////////////////////////////////////////////////////////////////////////////////////////
 
-    private PersistableNetworkPayloadCollection(Map<P2PDataStorage.ByteArray, PersistableNetworkPayload> map) {
+    private PersistableNetworkPayloadList(Map<P2PDataStorage.ByteArray, PersistableNetworkPayload> map) {
         this.map.putAll(map);
     }
 
@@ -69,11 +72,11 @@ public class PersistableNetworkPayloadCollection implements PersistableEnvelope 
     public static PersistableEnvelope fromProto(PB.PersistableNetworkPayloadList proto,
                                                 PersistenceProtoResolver resolver) {
         Map<P2PDataStorage.ByteArray, PersistableNetworkPayload> map = new HashMap<>();
-        proto.getItemsList().stream()
+        proto.getItemsList()
                 .forEach(e -> {
                     PersistableNetworkPayload payload = PersistableNetworkPayload.fromProto(e, resolver);
                     map.put(new P2PDataStorage.ByteArray(payload.getHash()), payload);
                 });
-        return new PersistableNetworkPayloadCollection(map);
+        return new PersistableNetworkPayloadList(map);
     }
 }

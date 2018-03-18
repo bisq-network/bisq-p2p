@@ -438,15 +438,16 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
                 log.trace("We got that version of the data already, so we don't broadcast it.");
             }
 
-            if (protectedStoragePayload instanceof PersistablePayload &&
-                    !persistedEntryMap.getMap().containsKey(hashOfPayload)) {
-                persistedEntryMap.getMap().put(hashOfPayload, protectedStorageEntry);
+            if (protectedStoragePayload instanceof PersistablePayload) {
+                if (!persistedEntryMap.getMap().containsKey(hashOfPayload)) {
+                    persistedEntryMap.getMap().put(hashOfPayload, protectedStorageEntry);
 
-                persistedEntryMapListeners.forEach(e -> e.onAdded(protectedStorageEntry));
+                    persistedEntryMapListeners.forEach(e -> e.onAdded(protectedStorageEntry));
 
-                persistedEntryMapStorage.queueUpForSave(persistedEntryMap, 200);
-            } else {
-                log.info("We do not add the protectedStorageEntry to the persistedEntryMap as it does already exist.");
+                    persistedEntryMapStorage.queueUpForSave(persistedEntryMap, 200);
+                } else {
+                    log.info("We do not add the protectedStorageEntry to the persistedEntryMap as it does already exist.");
+                }
             }
         } else {
             log.trace("add failed");

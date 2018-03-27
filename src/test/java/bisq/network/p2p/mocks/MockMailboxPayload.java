@@ -30,10 +30,8 @@ import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.UUID;
 
-import lombok.EqualsAndHashCode;
 import lombok.Value;
 
-@EqualsAndHashCode(callSuper = true)
 @Value
 public final class MockMailboxPayload extends NetworkEnvelope implements MailboxMessage, ExpirablePayload {
     private final int messageVersion = Version.getP2PMessageVersion();

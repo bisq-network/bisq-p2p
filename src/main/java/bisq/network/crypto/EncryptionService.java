@@ -107,7 +107,7 @@ public class EncryptionService {
                                                              PublicKey encryptionPublicKey)
             throws CryptoException {
         // Create a symmetric key
-        SecretKey secretKey = Encryption.generateSecretKey();
+        SecretKey secretKey = Encryption.generateSecretKey(256);
 
         // Encrypt secretKey with receiver's publicKey
         byte[] encryptedSecretKey = Encryption.encryptSecretKey(secretKey, encryptionPublicKey);

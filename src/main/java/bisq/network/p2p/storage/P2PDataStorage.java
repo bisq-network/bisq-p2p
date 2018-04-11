@@ -254,9 +254,13 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
                         }
                     });
 
-            toRemoveSet.forEach(
-                    protectedDataToRemove -> hashMapChangedListeners.forEach(
-                            listener -> listener.onRemoved(protectedDataToRemove)));
+            toRemoveSet.forEach(protectedDataToRemove ->
+                    hashMapChangedListeners.forEach(listener ->
+                            listener.execute(() ->
+                                    listener.onRemoved(protectedDataToRemove)
+                            )
+                    )
+            );
 
             if (sequenceNumberMap.size() > 1000)
                 sequenceNumberMap.setMap(getPurgedSequenceNumberMap(sequenceNumberMap.getMap()));
@@ -401,7 +405,8 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     }
 
     public boolean addProtectedStorageEntry(ProtectedStorageEntry protectedStorageEntry, @Nullable NodeAddress sender,
-                                            @Nullable BroadcastHandler.Listener listener, boolean isDataOwner, boolean allowBroadcast) {
+                                            @Nullable BroadcastHandler.Listener broadcastListener, boolean isDataOwner,
+                                            boolean allowBroadcast) {
         Log.traceCall("with allowBroadcast=" + allowBroadcast);
         final ProtectedStoragePayload protectedStoragePayload = protectedStorageEntry.getProtectedStoragePayload();
         ByteArray hashOfPayload = getHashAsByteArray(protectedStoragePayload);
@@ -421,7 +426,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
             if (!containsKey || hasSequenceNrIncreased) {
                 // At startup we don't have the item so we store it. At updates of the seq nr we store as well.
                 map.put(hashOfPayload, protectedStorageEntry);
-                hashMapChangedListeners.forEach(e -> e.onAdded(protectedStorageEntry));
+                hashMapChangedListeners.forEach(listener -> listener.execute(() -> listener.onAdded(protectedStorageEntry)));
                 // printData("after add");
             } else {
                 log.trace("We got that version of the data already, so we don't store it.");
@@ -433,7 +438,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
                 sequenceNumberMapStorage.queueUpForSave(SequenceNumberMap.clone(sequenceNumberMap), 2000);
 
                 if (allowBroadcast)
-                    broadcast(new AddDataMessage(protectedStorageEntry), sender, listener, isDataOwner);
+                    broadcast(new AddDataMessage(protectedStorageEntry), sender, broadcastListener, isDataOwner);
             } else {
                 log.trace("We got that version of the data already, so we don't broadcast it.");
             }
@@ -641,7 +646,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     private void doRemoveProtectedExpirableData(ProtectedStorageEntry protectedStorageEntry, ByteArray hashOfPayload) {
         map.remove(hashOfPayload);
         log.trace("Data removed from our map. We broadcast the message to our peers.");
-        hashMapChangedListeners.stream().forEach(e -> e.onRemoved(protectedStorageEntry));
+        hashMapChangedListeners.forEach(listener -> listener.execute(() -> listener.onRemoved(protectedStorageEntry)));
     }
 
     private boolean isSequenceNrValid(int newSequenceNumber, ByteArray hashOfData) {

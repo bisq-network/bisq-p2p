@@ -255,16 +255,40 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
                     });
 
             toRemoveSet.forEach(protectedDataToRemove ->
-                    hashMapChangedListeners.forEach(listener ->
-                            listener.execute(() ->
-                                    listener.onRemoved(protectedDataToRemove)
-                            )
-                    )
+                    notifyHashMapChangedListenersOnRemove(protectedDataToRemove)
             );
 
             if (sequenceNumberMap.size() > 1000)
                 sequenceNumberMap.setMap(getPurgedSequenceNumberMap(sequenceNumberMap.getMap()));
         }, CHECK_TTL_INTERVAL_SEC);
+    }
+
+    private void notifyHashMapChangedListenersOnRemove(ProtectedStorageEntry protectedStorageEntry) {
+        // If the listener has not implemented the executeOnUserThread method and overwritten with a return
+        // value of false we map to user thread. Otherwise we run the code directly from our current thread.
+        // Using executor.execute() would not work as the parser thread can be busy for a long time when parsing
+        // all the blocks and we want to get called our listener synchronously and not once the parsing task is
+        // completed.
+        hashMapChangedListeners.forEach(listener -> {
+            if (listener.executeOnUserThread())
+                UserThread.execute(() -> listener.onRemoved(protectedStorageEntry));
+            else
+                listener.onAdded(protectedStorageEntry);
+        });
+    }
+
+    private void notifyHashMapChangedListenersOnAdded(ProtectedStorageEntry protectedStorageEntry) {
+        // If the listener has not implemented the executeOnUserThread method and overwritten with a return
+        // value of false we map to user thread. Otherwise we run the code directly from our current thread.
+        // Using executor.execute() would not work as the parser thread can be busy for a long time when parsing
+        // all the blocks and we want to get called our listener synchronously and not once the parsing task is
+        // completed.
+        hashMapChangedListeners.forEach(listener -> {
+            if (listener.executeOnUserThread())
+                UserThread.execute(() -> listener.onAdded(protectedStorageEntry));
+            else
+                listener.onAdded(protectedStorageEntry);
+        });
     }
 
 
@@ -426,7 +450,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
             if (!containsKey || hasSequenceNrIncreased) {
                 // At startup we don't have the item so we store it. At updates of the seq nr we store as well.
                 map.put(hashOfPayload, protectedStorageEntry);
-                hashMapChangedListeners.forEach(listener -> listener.execute(() -> listener.onAdded(protectedStorageEntry)));
+                notifyHashMapChangedListenersOnAdded(protectedStorageEntry);
                 // printData("after add");
             } else {
                 log.trace("We got that version of the data already, so we don't store it.");
@@ -646,7 +670,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     private void doRemoveProtectedExpirableData(ProtectedStorageEntry protectedStorageEntry, ByteArray hashOfPayload) {
         map.remove(hashOfPayload);
         log.trace("Data removed from our map. We broadcast the message to our peers.");
-        hashMapChangedListeners.forEach(listener -> listener.execute(() -> listener.onRemoved(protectedStorageEntry)));
+        notifyHashMapChangedListenersOnRemove(protectedStorageEntry);
     }
 
     private boolean isSequenceNrValid(int newSequenceNumber, ByteArray hashOfData) {

@@ -116,7 +116,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
 
     @Getter
     private final Map<ByteArray, ProtectedStorageEntry> map = new ConcurrentHashMap<>();
-    private final CopyOnWriteArraySet<HashMapChangedListener> hashMapChangedListeners = new CopyOnWriteArraySet<>();
+    private final Set<HashMapChangedListener> hashMapListeners = new CopyOnWriteArraySet<>();
     private Timer removeExpiredEntriesTimer;
 
     private final Storage<SequenceNumberMap> sequenceNumberMapStorage;
@@ -125,12 +125,12 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     @Getter
     private PersistableNetworkPayloadList persistableNetworkPayloadList;
     private final Storage<PersistableNetworkPayloadList> persistableNetworkPayloadMapStorage;
-    private final CopyOnWriteArraySet<PersistableNetworkPayloadMapListener> persistableNetworkPayloadMapListeners = new CopyOnWriteArraySet<>();
+    private final Set<PersistableNetworkPayloadMapListener> persistableNetworkPayloadMapListeners = new CopyOnWriteArraySet<>();
 
     @Getter
     private PersistedEntryMap persistedEntryMap;
     private final Storage<PersistedEntryMap> persistedEntryMapStorage;
-    private final CopyOnWriteArraySet<PersistedEntryMapListener> persistedEntryMapListeners = new CopyOnWriteArraySet<>();
+    private final Set<PersistedEntryMapListener> persistedEntryMapListeners = new CopyOnWriteArraySet<>();
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -255,7 +255,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
                     });
 
             toRemoveSet.forEach(protectedDataToRemove ->
-                    notifyHashMapChangedListenersOnRemove(protectedDataToRemove)
+                    notifyHashMapListenersOnRemove(protectedDataToRemove)
             );
 
             if (sequenceNumberMap.size() > 1000)
@@ -263,32 +263,22 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
         }, CHECK_TTL_INTERVAL_SEC);
     }
 
-    private void notifyHashMapChangedListenersOnRemove(ProtectedStorageEntry protectedStorageEntry) {
+    private void notifyHashMapListenersOnRemove(ProtectedStorageEntry protectedStorageEntry) {
         // If the listener has not implemented the executeOnUserThread method and overwritten with a return
         // value of false we map to user thread. Otherwise we run the code directly from our current thread.
         // Using executor.execute() would not work as the parser thread can be busy for a long time when parsing
         // all the blocks and we want to get called our listener synchronously and not once the parsing task is
         // completed.
-        hashMapChangedListeners.forEach(listener -> {
-            if (listener.executeOnUserThread())
-                UserThread.execute(() -> listener.onRemoved(protectedStorageEntry));
-            else
-                listener.onAdded(protectedStorageEntry);
-        });
+        hashMapListeners.forEach(listener -> listener.execute(() -> listener.onRemoved(protectedStorageEntry)));
     }
 
-    private void notifyHashMapChangedListenersOnAdded(ProtectedStorageEntry protectedStorageEntry) {
+    private void notifyHashMapListenersOnAdded(ProtectedStorageEntry protectedStorageEntry) {
         // If the listener has not implemented the executeOnUserThread method and overwritten with a return
         // value of false we map to user thread. Otherwise we run the code directly from our current thread.
         // Using executor.execute() would not work as the parser thread can be busy for a long time when parsing
         // all the blocks and we want to get called our listener synchronously and not once the parsing task is
         // completed.
-        hashMapChangedListeners.forEach(listener -> {
-            if (listener.executeOnUserThread())
-                UserThread.execute(() -> listener.onAdded(protectedStorageEntry));
-            else
-                listener.onAdded(protectedStorageEntry);
-        });
+        hashMapListeners.forEach(listener -> listener.execute(() -> listener.onAdded(protectedStorageEntry)));
     }
 
 
@@ -450,7 +440,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
             if (!containsKey || hasSequenceNrIncreased) {
                 // At startup we don't have the item so we store it. At updates of the seq nr we store as well.
                 map.put(hashOfPayload, protectedStorageEntry);
-                notifyHashMapChangedListenersOnAdded(protectedStorageEntry);
+                notifyHashMapListenersOnAdded(protectedStorageEntry);
                 // printData("after add");
             } else {
                 log.trace("We got that version of the data already, so we don't store it.");
@@ -639,11 +629,11 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     }
 
     public void addHashMapChangedListener(HashMapChangedListener hashMapChangedListener) {
-        hashMapChangedListeners.add(hashMapChangedListener);
+        hashMapListeners.add(hashMapChangedListener);
     }
 
     public void removeHashMapChangedListener(HashMapChangedListener hashMapChangedListener) {
-        hashMapChangedListeners.remove(hashMapChangedListener);
+        hashMapListeners.remove(hashMapChangedListener);
     }
 
     public void addPersistableNetworkPayloadMapListener(PersistableNetworkPayloadMapListener listener) {
@@ -670,7 +660,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     private void doRemoveProtectedExpirableData(ProtectedStorageEntry protectedStorageEntry, ByteArray hashOfPayload) {
         map.remove(hashOfPayload);
         log.trace("Data removed from our map. We broadcast the message to our peers.");
-        notifyHashMapChangedListenersOnRemove(protectedStorageEntry);
+        notifyHashMapListenersOnRemove(protectedStorageEntry);
     }
 
     private boolean isSequenceNrValid(int newSequenceNumber, ByteArray hashOfData) {

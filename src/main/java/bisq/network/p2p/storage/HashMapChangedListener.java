@@ -19,9 +19,9 @@ package bisq.network.p2p.storage;
 
 import bisq.network.p2p.storage.payload.ProtectedStorageEntry;
 
-import bisq.common.ThreadContextAwareListener;
+import bisq.common.ThreadAwareListener;
 
-public interface HashMapChangedListener extends ThreadContextAwareListener {
+public interface HashMapChangedListener extends ThreadAwareListener {
     void onAdded(ProtectedStorageEntry data);
 
     @SuppressWarnings("UnusedParameters")

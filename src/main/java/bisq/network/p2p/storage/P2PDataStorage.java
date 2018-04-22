@@ -442,7 +442,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
                 sequenceNumberMapStorage.queueUpForSave(SequenceNumberMap.clone(sequenceNumberMap), 2000);
 
                 if (allowBroadcast)
-                    broadcast(new AddDataMessage(protectedStorageEntry), sender, broadcastListener, isDataOwner);
+                    broadcastProtectedStorageEntry(protectedStorageEntry, sender, broadcastListener, isDataOwner);
             } else {
                 log.trace("We got that version of the data already, so we don't broadcast it.");
             }
@@ -462,6 +462,13 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
             log.trace("add failed");
         }
         return result;
+    }
+
+    public void broadcastProtectedStorageEntry(ProtectedStorageEntry protectedStorageEntry,
+                                               @Nullable NodeAddress sender,
+                                               @Nullable BroadcastHandler.Listener broadcastListener,
+                                               boolean isDataOwner) {
+        broadcast(new AddDataMessage(protectedStorageEntry), sender, broadcastListener, isDataOwner);
     }
 
     public boolean refreshTTL(RefreshOfferMessage refreshTTLMessage, @Nullable NodeAddress sender, boolean isDataOwner) {

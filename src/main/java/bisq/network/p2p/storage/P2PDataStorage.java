@@ -171,7 +171,13 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
 
     // This method is called at startup in a non-user thread.
     // We should not have any threading issues here as the p2p network is just initializing
-    public synchronized void readFromResources(String storageFileName, String postFix) {
+
+    public synchronized void readFromResources(String postFix) {
+        readFromResources(PERSISTABLE_NETWORK_PAYLOAD_MAP_FILE_NAME, postFix);
+        readFromResources(PERSISTED_ENTRY_MAP_FILE_NAME, postFix);
+    }
+
+    private synchronized void readFromResources(String storageFileName, String postFix) {
         String resourceFileName = storageFileName + postFix;
         File dbDir = new File(storageDir.getAbsolutePath());
         if (!dbDir.exists() && !dbDir.mkdir())

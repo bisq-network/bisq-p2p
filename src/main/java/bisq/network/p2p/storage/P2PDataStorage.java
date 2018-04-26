@@ -31,6 +31,7 @@ import bisq.network.p2p.storage.messages.BroadcastMessage;
 import bisq.network.p2p.storage.messages.RefreshOfferMessage;
 import bisq.network.p2p.storage.messages.RemoveDataMessage;
 import bisq.network.p2p.storage.messages.RemoveMailboxDataMessage;
+import bisq.network.p2p.storage.payload.AppendOnlyPayload;
 import bisq.network.p2p.storage.payload.DateTolerantPayload;
 import bisq.network.p2p.storage.payload.ExpirablePayload;
 import bisq.network.p2p.storage.payload.MailboxStoragePayload;
@@ -537,7 +538,9 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
 
             broadcast(new RemoveDataMessage(protectedStorageEntry), sender, null, isDataOwner);
 
+            // If payload is AppendOnlyPayload we don't allow removal
             if (protectedStoragePayload instanceof PersistablePayload &&
+                    !(protectedStoragePayload instanceof AppendOnlyPayload) &&
                     persistedEntryMap.getMap().containsKey(hashOfPayload)) {
                 persistedEntryMap.getMap().remove(hashOfPayload);
 

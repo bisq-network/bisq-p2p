@@ -27,6 +27,8 @@ import bisq.network.p2p.peers.getdata.RequestDataManager;
 import bisq.network.p2p.peers.keepalive.KeepAliveManager;
 import bisq.network.p2p.peers.peerexchange.PeerExchangeManager;
 import bisq.network.p2p.storage.P2PDataStorage;
+import bisq.network.p2p.storage.PersistableNetworkPayloadMapService;
+import bisq.network.p2p.storage.PersistedEntryMapService;
 
 import bisq.common.app.AppModule;
 
@@ -51,6 +53,8 @@ public class P2PModule extends AppModule {
         bind(P2PService.class).in(Singleton.class);
         bind(PeerManager.class).in(Singleton.class);
         bind(P2PDataStorage.class).in(Singleton.class);
+        bind(PersistedEntryMapService.class).in(Singleton.class);
+        bind(PersistableNetworkPayloadMapService.class).in(Singleton.class);
         bind(RequestDataManager.class).in(Singleton.class);
         bind(PeerExchangeManager.class).in(Singleton.class);
         bind(KeepAliveManager.class).in(Singleton.class);

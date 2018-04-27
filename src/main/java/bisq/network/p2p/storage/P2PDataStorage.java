@@ -310,13 +310,11 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
         final byte[] hash = payload.getHash();
         if (payload.verifyHashSize()) {
             final ByteArray hashAsByteArray = new ByteArray(hash);
-            final Map<ByteArray, PersistableNetworkPayload> map = getPersistableNetworkPayloadList().getMap();
-            boolean containsKey = map.containsKey(hashAsByteArray);
+            boolean containsKey = getPersistableNetworkPayloadList().containsKey(hashAsByteArray);
             if (!containsKey || reBroadcast) {
                 if (!(payload instanceof DateTolerantPayload) || !checkDate || ((DateTolerantPayload) payload).isDateInTolerance()) {
                     if (!containsKey) {
-                        map.put(hashAsByteArray, payload);
-                        appendOnlyDataStoreService.persist();
+                        appendOnlyDataStoreService.put(hashAsByteArray, payload);
                         persistableNetworkPayloadMapListeners.forEach(e -> e.onAdded(payload));
                     }
                     if (allowBroadcast)
@@ -383,15 +381,9 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
             }
 
             if (protectedStoragePayload instanceof PersistablePayload) {
-                if (!persistedEntryMapService.getMap().containsKey(hashOfPayload)) {
-                    persistedEntryMapService.getMap().put(hashOfPayload, protectedStorageEntry);
-
+                ProtectedStorageEntry previous = persistedEntryMapService.putIfAbsent(hashOfPayload, protectedStorageEntry);
+                if (previous == null)
                     persistedEntryMapListeners.forEach(e -> e.onAdded(protectedStorageEntry));
-
-                    persistedEntryMapService.persist();
-                } else {
-                    log.info("We do not add the protectedStorageEntry to the persistedEntryMap as it does already exist.");
-                }
             }
         } else {
             log.trace("add failed");
@@ -466,12 +458,10 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
             broadcast(new RemoveDataMessage(protectedStorageEntry), sender, null, isDataOwner);
 
             if (protectedStoragePayload instanceof PersistablePayload &&
-                    persistedEntryMapService.getMap().containsKey(hashOfPayload)) {
-                persistedEntryMapService.getMap().remove(hashOfPayload);
+                    persistedEntryMapService.contains(hashOfPayload)) {
 
+                persistedEntryMapService.remove(hashOfPayload);
                 persistedEntryMapListeners.forEach(e -> e.onRemoved(protectedStorageEntry));
-
-                persistedEntryMapService.persist();
             } else {
                 log.info("We cannot remove the protectedStorageEntry from the persistedEntryMap as it does not exist.");
             }

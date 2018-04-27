@@ -19,6 +19,7 @@ package bisq.network.p2p.storage;
 
 import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
 
+import bisq.common.proto.persistable.PersistablePayload;
 import bisq.common.storage.Storage;
 
 import com.google.inject.name.Named;
@@ -32,7 +33,7 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class PersistableNetworkPayloadMapService extends BaseMapStorageService<PersistableNetworkPayloadList> {
+public class PersistableNetworkPayloadMapService extends BaseMapStorageService<PersistableNetworkPayloadList, PersistableNetworkPayload> {
     public static final String FILE_NAME = "PersistableNetworkPayloadMap";
 
 
@@ -56,8 +57,14 @@ public class PersistableNetworkPayloadMapService extends BaseMapStorageService<P
         return FILE_NAME;
     }
 
-    Map<P2PDataStorage.ByteArray, PersistableNetworkPayload> getMap() {
+    @Override
+    public Map<P2PDataStorage.ByteArray, PersistableNetworkPayload> getMap() {
         return envelope.getMap();
+    }
+
+    @Override
+    public boolean isMyPayload(PersistablePayload payload) {
+        return payload instanceof PersistableNetworkPayload;
     }
 
 

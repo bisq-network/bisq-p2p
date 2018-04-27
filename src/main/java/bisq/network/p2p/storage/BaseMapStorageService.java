@@ -18,6 +18,7 @@
 package bisq.network.p2p.storage;
 
 import bisq.common.proto.persistable.PersistableEnvelope;
+import bisq.common.proto.persistable.PersistablePayload;
 import bisq.common.storage.FileUtil;
 import bisq.common.storage.ResourceNotFoundException;
 import bisq.common.storage.Storage;
@@ -26,10 +27,12 @@ import java.nio.file.Paths;
 
 import java.io.File;
 
+import java.util.Map;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class BaseMapStorageService<T extends PersistableEnvelope> {
+public abstract class BaseMapStorageService<T extends PersistableEnvelope, R extends PersistablePayload> {
 
     protected final Storage<T> storage;
     private final String absolutePathOfStorageDir;
@@ -57,11 +60,31 @@ public abstract class BaseMapStorageService<T extends PersistableEnvelope> {
         storage.queueUpForSave(envelope, 2000);
     }
 
-    T getEnvelope() {
+    protected T getEnvelope() {
         return envelope;
     }
 
     abstract public String getFileName();
+
+    public abstract Map<P2PDataStorage.ByteArray, R> getMap();
+
+    abstract public boolean isMyPayload(PersistablePayload payload);
+
+    public R putIfAbsent(P2PDataStorage.ByteArray hash, R payload) {
+        R previous = getMap().putIfAbsent(hash, payload);
+        persist();
+        return previous;
+    }
+
+    public R remove(P2PDataStorage.ByteArray hash) {
+        final R result = getMap().remove(hash);
+        persist();
+        return result;
+    }
+
+    public boolean contains(P2PDataStorage.ByteArray hash) {
+        return getMap().containsKey(hash);
+    }
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////

@@ -17,16 +17,20 @@
 
 package bisq.network.p2p.storage;
 
+import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
+
 import javax.inject.Inject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class AppendOnlyDataStoreService {
 
+    private final PersistableNetworkPayloadList persistableNetworkPayloadList = new PersistableNetworkPayloadList();
     private List<PersistableNetworkPayloadMapService> services = new ArrayList<>();
 
 
@@ -36,7 +40,12 @@ public class AppendOnlyDataStoreService {
 
     @Inject
     public AppendOnlyDataStoreService(PersistableNetworkPayloadMapService persistableNetworkPayloadMapService) {
-        services.add(persistableNetworkPayloadMapService);
+        // We add our default service
+        addService(persistableNetworkPayloadMapService);
+    }
+
+    public void addService(PersistableNetworkPayloadMapService service) {
+        services.add(service);
     }
 
     void readFromResources(String postFix) {
@@ -44,14 +53,24 @@ public class AppendOnlyDataStoreService {
     }
 
     PersistableNetworkPayloadList getPersistableNetworkPayloadMap() {
-        return services.stream()
-                .filter(service -> service.getFileName().equals(PersistableNetworkPayloadMapService.FILE_NAME))
-                .map(service -> service.getEnvelope())
-                .findAny()
-                .get();
+        Map<P2PDataStorage.ByteArray, PersistableNetworkPayload> map = getMap();
+        services.stream()
+                .flatMap(service -> service.getMap().entrySet().stream())
+                .forEach(entry -> map.put(entry.getKey(), entry.getValue()));
+        return persistableNetworkPayloadList;
     }
 
-    void persist() {
-        services.forEach(BaseMapStorageService::persist);
+    public Map<P2PDataStorage.ByteArray, PersistableNetworkPayload> getMap() {
+        return persistableNetworkPayloadList.getMap();
+    }
+
+    public void put(P2PDataStorage.ByteArray hashAsByteArray, PersistableNetworkPayload payload) {
+        services.stream()
+                /* .filter(service -> !service.getFileName().equals(PersistableNetworkPayloadMapService.FILE_NAME))*/
+                .filter(service -> service.isMyPayload(payload))
+                .forEach(service -> {
+                    service.putIfAbsent(hashAsByteArray, payload);
+                })
+        ;
     }
 }

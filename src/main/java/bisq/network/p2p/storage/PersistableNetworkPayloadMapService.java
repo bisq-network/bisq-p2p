@@ -28,16 +28,12 @@ import javax.inject.Inject;
 import java.io.File;
 
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PersistableNetworkPayloadMapService extends BaseMapStorageService<PersistableNetworkPayloadList> {
-    private static final String PERSISTABLE_NETWORK_PAYLOAD_MAP_FILE_NAME = "PersistableNetworkPayloadMap";
-
-    private final Set<PersistableNetworkPayloadMapListener> persistableNetworkPayloadMapListeners = new CopyOnWriteArraySet<>();
+    public static final String FILE_NAME = "PersistableNetworkPayloadMap";
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -50,35 +46,27 @@ public class PersistableNetworkPayloadMapService extends BaseMapStorageService<P
         super(storageDir, persistableNetworkPayloadMapStorage);
     }
 
-    void readFromResources(String postFix) {
-        super.readFromResources(PERSISTABLE_NETWORK_PAYLOAD_MAP_FILE_NAME, postFix);
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // API
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public String getFileName() {
+        return FILE_NAME;
     }
 
     Map<P2PDataStorage.ByteArray, PersistableNetworkPayload> getMap() {
-        return persistableEnvelope.getMap();
+        return envelope.getMap();
     }
 
-    void addListener(PersistableNetworkPayloadMapListener listener) {
-        persistableNetworkPayloadMapListeners.add(listener);
-    }
 
-    void removeListener(PersistableNetworkPayloadMapListener listener) {
-        persistableNetworkPayloadMapListeners.remove(listener);
-    }
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // Protected
+    ///////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    protected void notifyListeners() {
-        persistableNetworkPayloadMapListeners.forEach(listener -> getMap().values()
-                .forEach(listener::onAdded));
-    }
-
-    @Override
-    PersistableNetworkPayloadList getPersistableEnvelope() {
-        return persistableEnvelope;
-    }
-
-    @Override
-    protected PersistableNetworkPayloadList createPersistableEnvelope() {
+    protected PersistableNetworkPayloadList createEnvelope() {
         return new PersistableNetworkPayloadList();
     }
 }

@@ -91,9 +91,6 @@ import javax.annotation.Nullable;
 
 @Slf4j
 public class P2PDataStorage implements MessageListener, ConnectionListener, PersistedDataHost {
-    public static final String PERSISTABLE_NETWORK_PAYLOAD_MAP_FILE_NAME = "PersistableNetworkPayloadMap";
-    public static final String PERSISTED_ENTRY_MAP_FILE_NAME = "PersistedEntryMap";
-
     /**
      * How many days to keep an entry before it is purged.
      */
@@ -103,8 +100,8 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     public static int CHECK_TTL_INTERVAL_SEC = 60;
 
     private final Broadcaster broadcaster;
+    private final AppendOnlyDataStoreService appendOnlyDataStoreService;
     private final PersistedEntryMapService persistedEntryMapService;
-    private final PersistableNetworkPayloadMapService persistableNetworkPayloadMapService;
 
     @Getter
     private final Map<ByteArray, ProtectedStorageEntry> map = new ConcurrentHashMap<>();
@@ -125,12 +122,12 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     @Inject
     public P2PDataStorage(NetworkNode networkNode,
                           Broadcaster broadcaster,
+                          AppendOnlyDataStoreService appendOnlyDataStoreService,
                           PersistedEntryMapService persistedEntryMapService,
-                          PersistableNetworkPayloadMapService persistableNetworkPayloadMapService,
                           Storage<SequenceNumberMap> sequenceNumberMapStorage) {
         this.broadcaster = broadcaster;
+        this.appendOnlyDataStoreService = appendOnlyDataStoreService;
         this.persistedEntryMapService = persistedEntryMapService;
-        this.persistableNetworkPayloadMapService = persistableNetworkPayloadMapService;
 
         networkNode.addMessageListener(this);
         networkNode.addConnectionListener(this);
@@ -154,7 +151,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     // We should not have any threading issues here as the p2p network is just initializing
 
     public synchronized void readFromResources(String postFix) {
-        persistableNetworkPayloadMapService.readFromResources(postFix);
+        appendOnlyDataStoreService.readFromResources(postFix);
         persistedEntryMapService.readFromResources(postFix);
 
         map.putAll(persistedEntryMapService.getMap());
@@ -202,11 +199,11 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     }
 
     public PersistableNetworkPayloadList getPersistableNetworkPayloadList() {
-        return persistableNetworkPayloadMapService.getPersistableEnvelope();
+        return appendOnlyDataStoreService.getPersistableNetworkPayloadMap();
     }
 
     public PersistedEntryMap getPersistedEntryMap() {
-        return persistedEntryMapService.getPersistableEnvelope();
+        return persistedEntryMapService.getEnvelope();
     }
 
 
@@ -313,12 +310,13 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
         final byte[] hash = payload.getHash();
         if (payload.verifyHashSize()) {
             final ByteArray hashAsByteArray = new ByteArray(hash);
-            boolean containsKey = persistableNetworkPayloadMapService.getMap().containsKey(hashAsByteArray);
+            final Map<ByteArray, PersistableNetworkPayload> map = getPersistableNetworkPayloadList().getMap();
+            boolean containsKey = map.containsKey(hashAsByteArray);
             if (!containsKey || reBroadcast) {
                 if (!(payload instanceof DateTolerantPayload) || !checkDate || ((DateTolerantPayload) payload).isDateInTolerance()) {
                     if (!containsKey) {
-                        persistableNetworkPayloadMapService.getMap().put(hashAsByteArray, payload);
-                        persistableNetworkPayloadMapService.persist();
+                        map.put(hashAsByteArray, payload);
+                        appendOnlyDataStoreService.persist();
                         persistableNetworkPayloadMapListeners.forEach(e -> e.onAdded(payload));
                     }
                     if (allowBroadcast)
@@ -565,22 +563,18 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
 
     public void addPersistableNetworkPayloadMapListener(PersistableNetworkPayloadMapListener listener) {
         persistableNetworkPayloadMapListeners.add(listener);
-        persistableNetworkPayloadMapService.addListener(listener);
     }
 
     public void removePersistableNetworkPayloadMapListener(PersistableNetworkPayloadMapListener listener) {
         persistableNetworkPayloadMapListeners.remove(listener);
-        persistableNetworkPayloadMapService.removeListener(listener);
     }
 
     public void addPersistedEntryMapListener(PersistedEntryMapListener listener) {
         persistedEntryMapListeners.add(listener);
-        persistedEntryMapService.addListener(listener);
     }
 
     public void removePersistedEntryMapListener(PersistedEntryMapListener listener) {
         persistedEntryMapListeners.remove(listener);
-        persistedEntryMapService.removeListener(listener);
     }
 
 

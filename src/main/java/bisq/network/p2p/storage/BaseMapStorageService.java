@@ -31,10 +31,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class BaseMapStorageService<T extends PersistableEnvelope> {
 
-    private final File storageDir;
     protected final Storage<T> storage;
+    private final String absolutePathOfStorageDir;
 
-    protected T persistableEnvelope;
+    protected T envelope;
 
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Constructor
@@ -42,28 +42,44 @@ public abstract class BaseMapStorageService<T extends PersistableEnvelope> {
 
     public BaseMapStorageService(File storageDir,
                                  Storage<T> storage) {
-        this.storageDir = storageDir;
         this.storage = storage;
+        absolutePathOfStorageDir = storageDir.getAbsolutePath();
 
         storage.setNumMaxBackupFiles(1);
     }
 
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // API
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
     void persist() {
-        storage.queueUpForSave(persistableEnvelope, 2000);
+        storage.queueUpForSave(envelope, 2000);
     }
 
-    protected void readFromResources(String storageFileName, String postFix) {
-        makeFileFromResourceFile(storageFileName, postFix, storageDir);
-        readPersistableEnvelope(storageFileName);
+    T getEnvelope() {
+        return envelope;
     }
 
-    protected void makeFileFromResourceFile(String storageFileName, String postFix, File storageDir) {
+    abstract public String getFileName();
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // Protected
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
+    protected void readFromResources(String postFix) {
+        makeFileFromResourceFile(getFileName(), postFix);
+        readPersistableEnvelope(getFileName());
+    }
+
+    protected void makeFileFromResourceFile(String storageFileName, String postFix) {
         String resourceFileName = storageFileName + postFix;
-        File dbDir = new File(storageDir.getAbsolutePath());
+        File dbDir = new File(absolutePathOfStorageDir);
         if (!dbDir.exists() && !dbDir.mkdir())
             log.warn("make dir failed.\ndbDir=" + dbDir.getAbsolutePath());
 
-        final File destinationFile = new File(Paths.get(storageDir.getAbsolutePath(), storageFileName).toString());
+        final File destinationFile = new File(Paths.get(absolutePathOfStorageDir, storageFileName).toString());
         if (!destinationFile.exists()) {
             try {
                 log.info("We copy resource to file: resourceFileName={}, destinationFile={}", resourceFileName, destinationFile);
@@ -82,18 +98,13 @@ public abstract class BaseMapStorageService<T extends PersistableEnvelope> {
 
 
     protected void readPersistableEnvelope(String storageFileName) {
-        persistableEnvelope = storage.initAndGetPersistedWithFileName(storageFileName, 100);
-        if (persistableEnvelope != null) {
-            log.info("size of {}: {} kb", storageFileName, persistableEnvelope.toProtoMessage().toByteArray().length / 100D);
-            notifyListeners();
+        envelope = storage.initAndGetPersistedWithFileName(storageFileName, 100);
+        if (envelope != null) {
+            log.info("size of {}: {} kb", storageFileName, envelope.toProtoMessage().toByteArray().length / 100D);
         } else {
-            persistableEnvelope = createPersistableEnvelope();
+            envelope = createEnvelope();
         }
     }
 
-    abstract protected void notifyListeners();
-
-    abstract T getPersistableEnvelope();
-
-    abstract protected T createPersistableEnvelope();
+    abstract protected T createEnvelope();
 }

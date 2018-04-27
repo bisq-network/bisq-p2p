@@ -28,16 +28,12 @@ import javax.inject.Inject;
 import java.io.File;
 
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PersistedEntryMapService extends BaseMapStorageService<PersistedEntryMap> {
-    private static final String PERSISTED_ENTRY_MAP_FILE_NAME = "PersistedEntryMap";
-
-    private final Set<PersistedEntryMapListener> persistedEntryMapListeners = new CopyOnWriteArraySet<>();
+    public static final String FILE_NAME = "PersistedEntryMap";
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -50,35 +46,27 @@ public class PersistedEntryMapService extends BaseMapStorageService<PersistedEnt
         super(storageDir, persistedEntryMapStorage);
     }
 
-    synchronized void readFromResources(String postFix) {
-        super.readFromResources(PERSISTED_ENTRY_MAP_FILE_NAME, postFix);
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // API
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public String getFileName() {
+        return FILE_NAME;
     }
 
     Map<P2PDataStorage.ByteArray, ProtectedStorageEntry> getMap() {
-        return persistableEnvelope.getMap();
+        return envelope.getMap();
     }
 
-    void addListener(PersistedEntryMapListener listener) {
-        persistedEntryMapListeners.add(listener);
-    }
 
-    void removeListener(PersistedEntryMapListener listener) {
-        persistedEntryMapListeners.remove(listener);
-    }
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // Protected
+    ///////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    PersistedEntryMap getPersistableEnvelope() {
-        return persistableEnvelope;
-    }
-
-    @Override
-    protected void notifyListeners() {
-        persistedEntryMapListeners.forEach(listener -> getMap().values()
-                .forEach(listener::onAdded));
-    }
-
-    @Override
-    protected PersistedEntryMap createPersistableEnvelope() {
+    protected PersistedEntryMap createEnvelope() {
         return new PersistedEntryMap();
     }
 }

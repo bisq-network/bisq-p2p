@@ -19,6 +19,8 @@ package bisq.network.p2p.storage;
 
 import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
 
+import bisq.common.proto.persistable.PersistableEnvelope;
+
 import javax.inject.Inject;
 
 import java.util.ArrayList;
@@ -31,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AppendOnlyDataStoreService {
 
     private final PersistableNetworkPayloadList persistableNetworkPayloadList = new PersistableNetworkPayloadList();
-    private List<PersistableNetworkPayloadMapService> services = new ArrayList<>();
+    private List<BaseMapStorageService<? extends PersistableEnvelope, PersistableNetworkPayload>> services = new ArrayList<>();
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -44,7 +46,7 @@ public class AppendOnlyDataStoreService {
         addService(persistableNetworkPayloadMapService);
     }
 
-    public void addService(PersistableNetworkPayloadMapService service) {
+    public void addService(BaseMapStorageService<? extends PersistableEnvelope, PersistableNetworkPayload> service) {
         services.add(service);
     }
 
@@ -64,9 +66,11 @@ public class AppendOnlyDataStoreService {
         return persistableNetworkPayloadList.getMap();
     }
 
+    // We do not store the data in the old PersistableNetworkPayloadMap anymore
+    //TODO tradeStatistics not impl. yet
     public void put(P2PDataStorage.ByteArray hashAsByteArray, PersistableNetworkPayload payload) {
         services.stream()
-                /* .filter(service -> !service.getFileName().equals(PersistableNetworkPayloadMapService.FILE_NAME))*/
+                .filter(service -> !service.getFileName().equals(PersistableNetworkPayloadMapService.FILE_NAME))
                 .filter(service -> service.isMyPayload(payload))
                 .forEach(service -> {
                     service.putIfAbsent(hashAsByteArray, payload);

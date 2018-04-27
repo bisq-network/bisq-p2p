@@ -254,7 +254,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
                                 // disconnected peer. We remove that data from our map.
 
                                 // Check if we have the data (e.g. OfferPayload)
-                                ByteArray hashOfPayload = getHashAsByteArray(networkPayload);
+                                ByteArray hashOfPayload = get32ByteHashAsByteArray(networkPayload);
                                 boolean containsKey = map.containsKey(hashOfPayload);
                                 if (containsKey) {
                                     log.debug("We remove the data as the data owner got disconnected with " +
@@ -346,7 +346,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
                                             @Nullable BroadcastHandler.Listener listener, boolean isDataOwner, boolean allowBroadcast) {
         Log.traceCall("with allowBroadcast=" + allowBroadcast);
         final ProtectedStoragePayload protectedStoragePayload = protectedStorageEntry.getProtectedStoragePayload();
-        ByteArray hashOfPayload = getHashAsByteArray(protectedStoragePayload);
+        ByteArray hashOfPayload = get32ByteHashAsByteArray(protectedStoragePayload);
         boolean sequenceNrValid = isSequenceNrValid(protectedStorageEntry.getSequenceNumber(), hashOfPayload);
         boolean result = checkPublicKeys(protectedStorageEntry, true)
                 && checkSignature(protectedStorageEntry)
@@ -438,7 +438,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     public boolean remove(ProtectedStorageEntry protectedStorageEntry, @Nullable NodeAddress sender, boolean isDataOwner) {
         Log.traceCall();
         final ProtectedStoragePayload protectedStoragePayload = protectedStorageEntry.getProtectedStoragePayload();
-        ByteArray hashOfPayload = getHashAsByteArray(protectedStoragePayload);
+        ByteArray hashOfPayload = get32ByteHashAsByteArray(protectedStoragePayload);
         boolean containsKey = map.containsKey(hashOfPayload);
         if (!containsKey)
             log.debug("Remove data ignored as we don't have an entry for that data.");
@@ -474,7 +474,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     @SuppressWarnings("UnusedReturnValue")
     public boolean removeMailboxData(ProtectedMailboxStorageEntry protectedMailboxStorageEntry, @Nullable NodeAddress sender, boolean isDataOwner) {
         Log.traceCall();
-        ByteArray hashOfData = getHashAsByteArray(protectedMailboxStorageEntry.getProtectedStoragePayload());
+        ByteArray hashOfData = get32ByteHashAsByteArray(protectedMailboxStorageEntry.getProtectedStoragePayload());
         boolean containsKey = map.containsKey(hashOfData);
         if (!containsKey)
             log.debug("Remove data ignored as we don't have an entry for that data.");
@@ -501,28 +501,28 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
 
     public ProtectedStorageEntry getProtectedStorageEntry(ProtectedStoragePayload protectedStoragePayload, KeyPair ownerStoragePubKey)
             throws CryptoException {
-        ByteArray hashOfData = getHashAsByteArray(protectedStoragePayload);
+        ByteArray hashOfData = get32ByteHashAsByteArray(protectedStoragePayload);
         int sequenceNumber;
         if (sequenceNumberMap.containsKey(hashOfData))
             sequenceNumber = sequenceNumberMap.get(hashOfData).sequenceNr + 1;
         else
             sequenceNumber = 1;
 
-        byte[] hashOfDataAndSeqNr = P2PDataStorage.getHash(new DataAndSeqNrPair(protectedStoragePayload, sequenceNumber));
+        byte[] hashOfDataAndSeqNr = P2PDataStorage.get32ByteHash(new DataAndSeqNrPair(protectedStoragePayload, sequenceNumber));
         byte[] signature = Sig.sign(ownerStoragePubKey.getPrivate(), hashOfDataAndSeqNr);
         return new ProtectedStorageEntry(protectedStoragePayload, ownerStoragePubKey.getPublic(), sequenceNumber, signature);
     }
 
     public RefreshOfferMessage getRefreshTTLMessage(ProtectedStoragePayload protectedStoragePayload, KeyPair ownerStoragePubKey)
             throws CryptoException {
-        ByteArray hashOfPayload = getHashAsByteArray(protectedStoragePayload);
+        ByteArray hashOfPayload = get32ByteHashAsByteArray(protectedStoragePayload);
         int sequenceNumber;
         if (sequenceNumberMap.containsKey(hashOfPayload))
             sequenceNumber = sequenceNumberMap.get(hashOfPayload).sequenceNr + 1;
         else
             sequenceNumber = 1;
 
-        byte[] hashOfDataAndSeqNr = P2PDataStorage.getHash(new DataAndSeqNrPair(protectedStoragePayload, sequenceNumber));
+        byte[] hashOfDataAndSeqNr = P2PDataStorage.get32ByteHash(new DataAndSeqNrPair(protectedStoragePayload, sequenceNumber));
         byte[] signature = Sig.sign(ownerStoragePubKey.getPrivate(), hashOfDataAndSeqNr);
         return new RefreshOfferMessage(hashOfDataAndSeqNr, signature, hashOfPayload.bytes, sequenceNumber);
     }
@@ -530,14 +530,14 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     public ProtectedMailboxStorageEntry getMailboxDataWithSignedSeqNr(MailboxStoragePayload expirableMailboxStoragePayload,
                                                                       KeyPair storageSignaturePubKey, PublicKey receiversPublicKey)
             throws CryptoException {
-        ByteArray hashOfData = getHashAsByteArray(expirableMailboxStoragePayload);
+        ByteArray hashOfData = get32ByteHashAsByteArray(expirableMailboxStoragePayload);
         int sequenceNumber;
         if (sequenceNumberMap.containsKey(hashOfData))
             sequenceNumber = sequenceNumberMap.get(hashOfData).sequenceNr + 1;
         else
             sequenceNumber = 1;
 
-        byte[] hashOfDataAndSeqNr = P2PDataStorage.getHash(new DataAndSeqNrPair(expirableMailboxStoragePayload, sequenceNumber));
+        byte[] hashOfDataAndSeqNr = P2PDataStorage.get32ByteHash(new DataAndSeqNrPair(expirableMailboxStoragePayload, sequenceNumber));
         byte[] signature = Sig.sign(storageSignaturePubKey.getPrivate(), hashOfDataAndSeqNr);
         return new ProtectedMailboxStorageEntry(expirableMailboxStoragePayload,
                 storageSignaturePubKey.getPublic(), sequenceNumber, signature, receiversPublicKey);
@@ -642,7 +642,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     }
 
     private boolean checkSignature(ProtectedStorageEntry protectedStorageEntry) {
-        byte[] hashOfDataAndSeqNr = P2PDataStorage.getHash(new DataAndSeqNrPair(protectedStorageEntry.getProtectedStoragePayload(), protectedStorageEntry.getSequenceNumber()));
+        byte[] hashOfDataAndSeqNr = P2PDataStorage.get32ByteHash(new DataAndSeqNrPair(protectedStorageEntry.getProtectedStoragePayload(), protectedStorageEntry.getSequenceNumber()));
         return checkSignature(protectedStorageEntry.getOwnerPubKey(), hashOfDataAndSeqNr, protectedStorageEntry.getSignature());
     }
 
@@ -695,7 +695,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
             ProtectedMailboxStorageEntry entry = (ProtectedMailboxStorageEntry) storedData;
             // publicKey is not the same (stored: sender, new: receiver)
             boolean result = entry.getReceiversPubKey().equals(receiversPubKey)
-                    && getHashAsByteArray(entry.getProtectedStoragePayload()).equals(hashOfData);
+                    && get32ByteHashAsByteArray(entry.getProtectedStoragePayload()).equals(hashOfData);
             if (!result)
                 log.warn("New data entry does not match our stored data. entry.receiversPubKey=" + entry.getReceiversPubKey()
                         + ", receiversPubKey=" + receiversPubKey);
@@ -712,8 +712,8 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
         broadcaster.broadcast(message, sender, listener, isDataOwner);
     }
 
-    public static ByteArray getHashAsByteArray(NetworkPayload data) {
-        return new ByteArray(P2PDataStorage.getHash(data));
+    private ByteArray get32ByteHashAsByteArray(NetworkPayload data) {
+        return new ByteArray(P2PDataStorage.get32ByteHash(data));
     }
 
     // Get a new map with entries older than PURGE_AGE_DAYS purged from the given map.
@@ -733,13 +733,13 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
             sb.append("Data set ").append(info).append(" operation");
             // We print the items sorted by hash with the payload class name and id
             List<Tuple2<String, ProtectedStorageEntry>> tempList = map.values().stream()
-                    .map(e -> new Tuple2<>(org.bitcoinj.core.Utils.HEX.encode(getHashAsByteArray(e.getProtectedStoragePayload()).bytes), e))
+                    .map(e -> new Tuple2<>(org.bitcoinj.core.Utils.HEX.encode(get32ByteHashAsByteArray(e.getProtectedStoragePayload()).bytes), e))
                     .collect(Collectors.toList());
             tempList.sort((o1, o2) -> o1.first.compareTo(o2.first));
             tempList.stream().forEach(e -> {
                 final ProtectedStorageEntry storageEntry = e.second;
                 final ProtectedStoragePayload protectedStoragePayload = storageEntry.getProtectedStoragePayload();
-                final MapValue mapValue = sequenceNumberMap.get(getHashAsByteArray(protectedStoragePayload));
+                final MapValue mapValue = sequenceNumberMap.get(get32ByteHashAsByteArray(protectedStoragePayload));
                 sb.append("\n")
                         .append("Hash=")
                         .append(e.first)
@@ -766,7 +766,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
      * @param data
      * @return Hash of data
      */
-    public static byte[] getHash(NetworkPayload data) {
+    public static byte[] get32ByteHash(NetworkPayload data) {
         return Hash.getSha256Hash(data.toProtoMessage().toByteArray());
     }
 

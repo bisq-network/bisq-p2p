@@ -712,7 +712,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
         broadcaster.broadcast(message, sender, listener, isDataOwner);
     }
 
-    private ByteArray getHashAsByteArray(NetworkPayload data) {
+    public static ByteArray getHashAsByteArray(NetworkPayload data) {
         return new ByteArray(P2PDataStorage.getHash(data));
     }
 

@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public abstract class BaseMapStorageService<T extends PersistableEnvelope, R extends PersistablePayload> {
 
     protected final Storage<T> storage;
-    private final String absolutePathOfStorageDir;
+    protected final String absolutePathOfStorageDir;
 
     protected T envelope;
 
@@ -56,7 +56,7 @@ public abstract class BaseMapStorageService<T extends PersistableEnvelope, R ext
     // API
     ///////////////////////////////////////////////////////////////////////////////////////////
 
-    void persist() {
+    protected void persist() {
         storage.queueUpForSave(envelope, 2000);
     }
 
@@ -92,17 +92,18 @@ public abstract class BaseMapStorageService<T extends PersistableEnvelope, R ext
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     protected void readFromResources(String postFix) {
-        makeFileFromResourceFile(getFileName(), postFix);
-        readPersistableEnvelope(getFileName());
+        makeFileFromResourceFile(postFix);
+        readPersistableEnvelope();
     }
 
-    protected void makeFileFromResourceFile(String storageFileName, String postFix) {
-        String resourceFileName = storageFileName + postFix;
+    protected void makeFileFromResourceFile(String postFix) {
+        final String fileName = getFileName();
+        String resourceFileName = fileName + postFix;
         File dbDir = new File(absolutePathOfStorageDir);
         if (!dbDir.exists() && !dbDir.mkdir())
             log.warn("make dir failed.\ndbDir=" + dbDir.getAbsolutePath());
 
-        final File destinationFile = new File(Paths.get(absolutePathOfStorageDir, storageFileName).toString());
+        final File destinationFile = new File(Paths.get(absolutePathOfStorageDir, fileName).toString());
         if (!destinationFile.exists()) {
             try {
                 log.info("We copy resource to file: resourceFileName={}, destinationFile={}", resourceFileName, destinationFile);
@@ -115,15 +116,16 @@ public abstract class BaseMapStorageService<T extends PersistableEnvelope, R ext
                 e.printStackTrace();
             }
         } else {
-            log.debug(storageFileName + " file exists already.");
+            log.debug(fileName + " file exists already.");
         }
     }
 
 
-    protected void readPersistableEnvelope(String storageFileName) {
-        envelope = storage.initAndGetPersistedWithFileName(storageFileName, 100);
+    protected void readPersistableEnvelope() {
+        final String fileName = getFileName();
+        envelope = storage.initAndGetPersistedWithFileName(fileName, 100);
         if (envelope != null) {
-            log.info("size of {}: {} kb", storageFileName, envelope.toProtoMessage().toByteArray().length / 100D);
+            log.info("size of {}: {} kb", fileName, envelope.toProtoMessage().toByteArray().length / 100D);
         } else {
             envelope = createEnvelope();
         }

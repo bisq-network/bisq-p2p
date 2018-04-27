@@ -20,20 +20,29 @@ package bisq.network.p2p.storage;
 import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
 
 import bisq.common.proto.persistable.PersistablePayload;
+import bisq.common.storage.FileUtil;
 import bisq.common.storage.Storage;
 
 import com.google.inject.name.Named;
 
 import javax.inject.Inject;
 
+import java.nio.file.Paths;
+
 import java.io.File;
+import java.io.IOException;
 
 import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Not used anymore. We still need the class for supporting the transfer of th old data structure to the new.
+ * Can be removed at the next hard fork.
+ */
+@Deprecated
 @Slf4j
-public class PersistableNetworkPayloadMapService extends BaseMapStorageService<PersistableNetworkPayloadList, PersistableNetworkPayload> {
+public final class PersistableNetworkPayloadMapService extends BaseMapStorageService<PersistableNetworkPayloadList, PersistableNetworkPayload> {
     public static final String FILE_NAME = "PersistableNetworkPayloadMap";
 
 
@@ -51,6 +60,33 @@ public class PersistableNetworkPayloadMapService extends BaseMapStorageService<P
     ///////////////////////////////////////////////////////////////////////////////////////////
     // API
     ///////////////////////////////////////////////////////////////////////////////////////////
+
+    public void removeFile() {
+        final File file = new File(Paths.get(absolutePathOfStorageDir, getFileName()).toString());
+        if (file.exists())
+            log.info("Remove deprecated file " + file.getAbsolutePath());
+        try {
+            FileUtil.deleteFileIfExists(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.error(e.toString());
+        }
+    }
+
+    @Override
+    public PersistableNetworkPayload putIfAbsent(P2PDataStorage.ByteArray hash, PersistableNetworkPayload payload) {
+        throw new RuntimeException("putIfAbsent must not be called on deprecated PersistableNetworkPayloadMapService");
+    }
+
+    @Override
+    protected void persist() {
+        throw new RuntimeException("persist must not be called on deprecated PersistableNetworkPayloadMapService");
+    }
+
+    @Override
+    public PersistableNetworkPayload remove(P2PDataStorage.ByteArray hash) {
+        throw new RuntimeException("remove must not be called on deprecated PersistableNetworkPayloadMapService");
+    }
 
     @Override
     public String getFileName() {

@@ -35,6 +35,10 @@ public class AppendOnlyDataStoreService {
     private final PersistableNetworkPayloadList persistableNetworkPayloadList = new PersistableNetworkPayloadList();
     private List<BaseMapStorageService<? extends PersistableEnvelope, PersistableNetworkPayload>> services = new ArrayList<>();
 
+    // We do not add PersistableNetworkPayloadMapService to the services list as it it deprecated and used only to
+    // transfer old persisted data to the new data structure.
+    private PersistableNetworkPayloadMapService persistableNetworkPayloadMapService;
+
 
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Constructor
@@ -42,8 +46,7 @@ public class AppendOnlyDataStoreService {
 
     @Inject
     public AppendOnlyDataStoreService(PersistableNetworkPayloadMapService persistableNetworkPayloadMapService) {
-        // We add our default service
-        addService(persistableNetworkPayloadMapService);
+        this.persistableNetworkPayloadMapService = persistableNetworkPayloadMapService;
     }
 
     public void addService(BaseMapStorageService<? extends PersistableEnvelope, PersistableNetworkPayload> service) {
@@ -52,6 +55,17 @@ public class AppendOnlyDataStoreService {
 
     void readFromResources(String postFix) {
         services.forEach(service -> service.readFromResources(postFix));
+
+        transferDeprecatedDataStructure();
+    }
+
+    private void transferDeprecatedDataStructure() {
+        // We read the file if it exists in the db folder
+        persistableNetworkPayloadMapService.readPersistableEnvelope();
+        // Transfer the content to the new services
+        persistableNetworkPayloadMapService.getMap().forEach(this::put);
+        // We are done with the transfer, now let's remove the file
+        persistableNetworkPayloadMapService.removeFile();
     }
 
     PersistableNetworkPayloadList getPersistableNetworkPayloadMap() {
@@ -66,11 +80,8 @@ public class AppendOnlyDataStoreService {
         return persistableNetworkPayloadList.getMap();
     }
 
-    // We do not store the data in the old PersistableNetworkPayloadMap anymore
-    //TODO tradeStatistics not impl. yet
     public void put(P2PDataStorage.ByteArray hashAsByteArray, PersistableNetworkPayload payload) {
         services.stream()
-                .filter(service -> !service.getFileName().equals(PersistableNetworkPayloadMapService.FILE_NAME))
                 .filter(service -> service.isMyPayload(payload))
                 .forEach(service -> {
                     service.putIfAbsent(hashAsByteArray, payload);

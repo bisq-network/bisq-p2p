@@ -54,7 +54,7 @@ public class PersistableNetworkPayloadList implements PersistableEnvelope {
     // PROTO BUFFER
     ///////////////////////////////////////////////////////////////////////////////////////////
 
-    private PersistableNetworkPayloadList(Map<P2PDataStorage.ByteArray, PersistableNetworkPayload> map) {
+    public PersistableNetworkPayloadList(Map<P2PDataStorage.ByteArray, PersistableNetworkPayload> map) {
         this.map.putAll(map);
     }
 
@@ -78,5 +78,9 @@ public class PersistableNetworkPayloadList implements PersistableEnvelope {
                     map.put(new P2PDataStorage.ByteArray(payload.getHash()), payload);
                 });
         return new PersistableNetworkPayloadList(map);
+    }
+
+    public boolean containsKey(P2PDataStorage.ByteArray hash) {
+        return map.containsKey(hash);
     }
 }

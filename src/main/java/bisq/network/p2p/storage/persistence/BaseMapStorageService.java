@@ -15,7 +15,9 @@
  * along with Bisq. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package bisq.network.p2p.storage;
+package bisq.network.p2p.storage.persistence;
+
+import bisq.network.p2p.storage.P2PDataStorage;
 
 import bisq.common.proto.persistable.PersistableEnvelope;
 import bisq.common.proto.persistable.PersistablePayload;

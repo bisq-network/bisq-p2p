@@ -39,6 +39,11 @@ import bisq.network.p2p.storage.payload.ProtectedMailboxStorageEntry;
 import bisq.network.p2p.storage.payload.ProtectedStorageEntry;
 import bisq.network.p2p.storage.payload.ProtectedStoragePayload;
 import bisq.network.p2p.storage.payload.RequiresOwnerIsOnlinePayload;
+import bisq.network.p2p.storage.persistence.AppendOnlyDataStoreListener;
+import bisq.network.p2p.storage.persistence.AppendOnlyDataStoreService;
+import bisq.network.p2p.storage.persistence.ProtectedDataStoreListener;
+import bisq.network.p2p.storage.persistence.ProtectedDataStoreService;
+import bisq.network.p2p.storage.persistence.SequenceNumberMap;
 
 import bisq.common.Timer;
 import bisq.common.UserThread;
@@ -111,8 +116,8 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     private final Storage<SequenceNumberMap> sequenceNumberMapStorage;
     private final SequenceNumberMap sequenceNumberMap = new SequenceNumberMap();
 
-    private final Set<PersistableNetworkPayloadMapListener> persistableNetworkPayloadMapListeners = new CopyOnWriteArraySet<>();
-    private final Set<PersistedEntryMapListener> persistedEntryMapListeners = new CopyOnWriteArraySet<>();
+    private final Set<AppendOnlyDataStoreListener> appendOnlyDataStoreListeners = new CopyOnWriteArraySet<>();
+    private final Set<ProtectedDataStoreListener> protectedDataStoreListeners = new CopyOnWriteArraySet<>();
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -311,7 +316,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
                 if (!(payload instanceof DateTolerantPayload) || !checkDate || ((DateTolerantPayload) payload).isDateInTolerance()) {
                     if (!containsKey) {
                         appendOnlyDataStoreService.put(hashAsByteArray, payload);
-                        persistableNetworkPayloadMapListeners.forEach(e -> e.onAdded(payload));
+                        appendOnlyDataStoreListeners.forEach(e -> e.onAdded(payload));
                     }
                     if (allowBroadcast)
                         broadcaster.broadcast(new AddPersistableNetworkPayloadMessage(payload), sender, null, isDataOwner);
@@ -380,7 +385,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
                 ByteArray compactHash = getCompactHashAsByteArray(protectedStoragePayload);
                 ProtectedStorageEntry previous = protectedDataStoreService.putIfAbsent(compactHash, protectedStorageEntry);
                 if (previous == null)
-                    persistedEntryMapListeners.forEach(e -> e.onAdded(protectedStorageEntry));
+                    protectedDataStoreListeners.forEach(e -> e.onAdded(protectedStorageEntry));
             }
         } else {
             log.trace("add failed");
@@ -458,7 +463,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
                 ByteArray compactHash = getCompactHashAsByteArray(protectedStoragePayload);
                 ProtectedStorageEntry previous = protectedDataStoreService.remove(compactHash);
                 if (previous != null) {
-                    persistedEntryMapListeners.forEach(e -> e.onRemoved(protectedStorageEntry));
+                    protectedDataStoreListeners.forEach(e -> e.onRemoved(protectedStorageEntry));
                 } else {
                     log.info("We cannot remove the protectedStorageEntry from the persistedEntryMap as it does not exist.");
                 }
@@ -549,20 +554,20 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
         hashMapChangedListeners.remove(hashMapChangedListener);
     }
 
-    public void addPersistableNetworkPayloadMapListener(PersistableNetworkPayloadMapListener listener) {
-        persistableNetworkPayloadMapListeners.add(listener);
+    public void addAppendOnlyDataStoreListener(AppendOnlyDataStoreListener listener) {
+        appendOnlyDataStoreListeners.add(listener);
     }
 
-    public void removePersistableNetworkPayloadMapListener(PersistableNetworkPayloadMapListener listener) {
-        persistableNetworkPayloadMapListeners.remove(listener);
+    public void removeAppendOnlyDataStoreListener(AppendOnlyDataStoreListener listener) {
+        appendOnlyDataStoreListeners.remove(listener);
     }
 
-    public void addPersistedEntryMapListener(PersistedEntryMapListener listener) {
-        persistedEntryMapListeners.add(listener);
+    public void addProtectedDataStoreListener(ProtectedDataStoreListener listener) {
+        protectedDataStoreListeners.add(listener);
     }
 
-    public void removePersistedEntryMapListener(PersistedEntryMapListener listener) {
-        persistedEntryMapListeners.remove(listener);
+    public void removeProtectedDataStoreListener(ProtectedDataStoreListener listener) {
+        protectedDataStoreListeners.remove(listener);
     }
 
 

@@ -15,8 +15,9 @@
  * along with Bisq. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package bisq.network.p2p.storage;
+package bisq.network.p2p.storage.persistence;
 
+import bisq.network.p2p.storage.P2PDataStorage;
 import bisq.network.p2p.storage.payload.ProtectedStorageEntry;
 
 import bisq.common.proto.persistable.PersistableEnvelope;
@@ -47,7 +48,7 @@ public class ProtectedDataStoreService {
         services.add(service);
     }
 
-    void readFromResources(String postFix) {
+    public void readFromResources(String postFix) {
         services.forEach(service -> service.readFromResources(postFix));
     }
 

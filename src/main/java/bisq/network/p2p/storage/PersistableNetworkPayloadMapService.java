@@ -18,6 +18,8 @@
 package bisq.network.p2p.storage;
 
 import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
+import bisq.network.p2p.storage.persistence.BaseMapStorageService;
+import bisq.network.p2p.storage.persistence.PersistableNetworkPayloadList;
 
 import bisq.common.storage.FileUtil;
 import bisq.common.storage.Storage;

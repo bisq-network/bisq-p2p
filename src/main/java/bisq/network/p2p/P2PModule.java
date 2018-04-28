@@ -26,10 +26,10 @@ import bisq.network.p2p.peers.PeerManager;
 import bisq.network.p2p.peers.getdata.RequestDataManager;
 import bisq.network.p2p.peers.keepalive.KeepAliveManager;
 import bisq.network.p2p.peers.peerexchange.PeerExchangeManager;
-import bisq.network.p2p.storage.AppendOnlyDataStoreService;
 import bisq.network.p2p.storage.P2PDataStorage;
 import bisq.network.p2p.storage.PersistableNetworkPayloadMapService;
-import bisq.network.p2p.storage.ProtectedDataStoreService;
+import bisq.network.p2p.storage.persistence.AppendOnlyDataStoreService;
+import bisq.network.p2p.storage.persistence.ProtectedDataStoreService;
 
 import bisq.common.app.AppModule;
 

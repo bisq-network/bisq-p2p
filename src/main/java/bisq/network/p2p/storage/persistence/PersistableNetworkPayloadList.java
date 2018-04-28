@@ -15,8 +15,9 @@
  * along with Bisq. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package bisq.network.p2p.storage;
+package bisq.network.p2p.storage.persistence;
 
+import bisq.network.p2p.storage.P2PDataStorage;
 import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
 
 import bisq.common.proto.persistable.PersistableEnvelope;
@@ -41,12 +42,13 @@ import lombok.extern.slf4j.Slf4j;
 // The class name should be map not list but we want to stick with the PB definition name and that cannot be changed
 // without breaking backward compatibility.
 // TODO at next hard fork we can rename the PB definition and class name.
+@Deprecated
 @Slf4j
 public class PersistableNetworkPayloadList implements PersistableEnvelope {
     @Getter
     private Map<P2PDataStorage.ByteArray, PersistableNetworkPayload> map = new ConcurrentHashMap<>();
 
-    PersistableNetworkPayloadList() {
+    public PersistableNetworkPayloadList() {
     }
 
 

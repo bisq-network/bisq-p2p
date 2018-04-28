@@ -141,10 +141,6 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
         SequenceNumberMap persistedSequenceNumberMap = sequenceNumberMapStorage.initAndGetPersisted(sequenceNumberMap, 300);
         if (persistedSequenceNumberMap != null)
             sequenceNumberMap.setMap(getPurgedSequenceNumberMap(persistedSequenceNumberMap.getMap()));
-
-        // PersistableNetworkPayloadMap and PersistedEntryMap cannot be set here as we don't know yet the selected
-        // base currency which is used to keep the resource files separated per base currency.
-        // We get it called in readFromResources once ready.
     }
 
     // This method is called at startup in a non-user thread.

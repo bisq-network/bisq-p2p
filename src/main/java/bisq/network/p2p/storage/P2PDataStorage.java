@@ -726,11 +726,11 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
         return new ByteArray(P2PDataStorage.get32ByteHash(data));
     }
 
-    private ByteArray getCompactHashAsByteArray(ProtectedStoragePayload protectedStoragePayload) {
+    public static ByteArray getCompactHashAsByteArray(ProtectedStoragePayload protectedStoragePayload) {
         return new ByteArray(getCompactHash(protectedStoragePayload));
     }
 
-    private byte[] getCompactHash(ProtectedStoragePayload protectedStoragePayload) {
+    public static byte[] getCompactHash(ProtectedStoragePayload protectedStoragePayload) {
         return Hash.getSha256Ripemd160hash(protectedStoragePayload.toProtoMessage().toByteArray());
     }
 

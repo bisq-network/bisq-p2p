@@ -88,6 +88,11 @@ public class ProtectedStorageEntry implements NetworkPayload, PersistablePayload
                 .build();
     }
 
+    public PB.ProtectedStorageEntry toProtectedStorageEntry() {
+        return (PB.ProtectedStorageEntry) toProtoMessage();
+
+    }
+
     public static ProtectedStorageEntry fromProto(PB.ProtectedStorageEntry proto,
                                                   NetworkProtoResolver resolver) {
         return new ProtectedStorageEntry(proto.getCreationTimeStamp(),

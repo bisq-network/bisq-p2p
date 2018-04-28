@@ -15,7 +15,9 @@
  * along with Bisq. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package bisq.network.p2p.storage;
+package bisq.network.p2p.storage.persistence;
+
+import bisq.network.p2p.storage.P2PDataStorage;
 
 import bisq.common.proto.persistable.PersistableEnvelope;
 import bisq.common.proto.persistable.PersistablePayload;
@@ -32,19 +34,19 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class BaseMapStorageService<T extends PersistableEnvelope, R extends PersistablePayload> {
+public abstract class StoreService<T extends PersistableEnvelope, R extends PersistablePayload> {
 
     protected final Storage<T> storage;
     protected final String absolutePathOfStorageDir;
 
-    protected T envelope;
+    protected T store;
 
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Constructor
     ///////////////////////////////////////////////////////////////////////////////////////////
 
-    public BaseMapStorageService(File storageDir,
-                                 Storage<T> storage) {
+    public StoreService(File storageDir,
+                        Storage<T> storage) {
         this.storage = storage;
         absolutePathOfStorageDir = storageDir.getAbsolutePath();
 
@@ -57,32 +59,32 @@ public abstract class BaseMapStorageService<T extends PersistableEnvelope, R ext
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     protected void persist() {
-        storage.queueUpForSave(envelope, 2000);
+        storage.queueUpForSave(store, 2000);
     }
 
-    protected T getEnvelope() {
-        return envelope;
+    protected T getStore() {
+        return store;
     }
 
     abstract public String getFileName();
 
-    public abstract Map<P2PDataStorage.ByteArray, R> getMap();
+    abstract public Map<P2PDataStorage.ByteArray, R> getMap();
 
-    abstract public boolean isMyPayload(PersistablePayload payload);
+    abstract public boolean canHandle(R payload);
 
-    public R putIfAbsent(P2PDataStorage.ByteArray hash, R payload) {
+    R putIfAbsent(P2PDataStorage.ByteArray hash, R payload) {
         R previous = getMap().putIfAbsent(hash, payload);
         persist();
         return previous;
     }
 
-    public R remove(P2PDataStorage.ByteArray hash) {
+    R remove(P2PDataStorage.ByteArray hash) {
         final R result = getMap().remove(hash);
         persist();
         return result;
     }
 
-    public boolean contains(P2PDataStorage.ByteArray hash) {
+    boolean containsKey(P2PDataStorage.ByteArray hash) {
         return getMap().containsKey(hash);
     }
 
@@ -93,7 +95,7 @@ public abstract class BaseMapStorageService<T extends PersistableEnvelope, R ext
 
     protected void readFromResources(String postFix) {
         makeFileFromResourceFile(postFix);
-        readPersistableEnvelope();
+        readStore();
     }
 
     protected void makeFileFromResourceFile(String postFix) {
@@ -121,15 +123,15 @@ public abstract class BaseMapStorageService<T extends PersistableEnvelope, R ext
     }
 
 
-    protected void readPersistableEnvelope() {
+    protected void readStore() {
         final String fileName = getFileName();
-        envelope = storage.initAndGetPersistedWithFileName(fileName, 100);
-        if (envelope != null) {
-            log.info("size of {}: {} kb", fileName, envelope.toProtoMessage().toByteArray().length / 100D);
+        store = storage.initAndGetPersistedWithFileName(fileName, 100);
+        if (store != null) {
+            log.info("size of {}: {} kb", fileName, store.toProtoMessage().toByteArray().length / 100D);
         } else {
-            envelope = createEnvelope();
+            store = createStore();
         }
     }
 
-    abstract protected T createEnvelope();
+    abstract protected T createStore();
 }

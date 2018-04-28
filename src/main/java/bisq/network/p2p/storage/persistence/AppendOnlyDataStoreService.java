@@ -15,8 +15,9 @@
  * along with Bisq. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package bisq.network.p2p.storage;
+package bisq.network.p2p.storage.persistence;
 
+import bisq.network.p2p.storage.P2PDataStorage;
 import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
 
 import bisq.common.proto.persistable.PersistableEnvelope;
@@ -26,18 +27,17 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class AppendOnlyDataStoreService {
+    private List<StoreService<? extends PersistableEnvelope, PersistableNetworkPayload>> services = new ArrayList<>();
 
-    private final PersistableNetworkPayloadList persistableNetworkPayloadList = new PersistableNetworkPayloadList();
-    private List<BaseMapStorageService<? extends PersistableEnvelope, PersistableNetworkPayload>> services = new ArrayList<>();
-
-    // We do not add PersistableNetworkPayloadMapService to the services list as it it deprecated and used only to
+    // We do not add PersistableNetworkPayloadListService to the services list as it it deprecated and used only to
     // transfer old persisted data to the new data structure.
-    private PersistableNetworkPayloadMapService persistableNetworkPayloadMapService;
+    private PersistableNetworkPayloadListService persistableNetworkPayloadListService;
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -45,15 +45,15 @@ public class AppendOnlyDataStoreService {
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     @Inject
-    public AppendOnlyDataStoreService(PersistableNetworkPayloadMapService persistableNetworkPayloadMapService) {
-        this.persistableNetworkPayloadMapService = persistableNetworkPayloadMapService;
+    public AppendOnlyDataStoreService(PersistableNetworkPayloadListService persistableNetworkPayloadListService) {
+        this.persistableNetworkPayloadListService = persistableNetworkPayloadListService;
     }
 
-    public void addService(BaseMapStorageService<? extends PersistableEnvelope, PersistableNetworkPayload> service) {
+    public void addService(StoreService<? extends PersistableEnvelope, PersistableNetworkPayload> service) {
         services.add(service);
     }
 
-    void readFromResources(String postFix) {
+    public void readFromResources(String postFix) {
         services.forEach(service -> service.readFromResources(postFix));
 
         transferDeprecatedDataStructure();
@@ -61,31 +61,24 @@ public class AppendOnlyDataStoreService {
 
     private void transferDeprecatedDataStructure() {
         // We read the file if it exists in the db folder
-        persistableNetworkPayloadMapService.readPersistableEnvelope();
+        persistableNetworkPayloadListService.readStore();
         // Transfer the content to the new services
-        persistableNetworkPayloadMapService.getMap().forEach(this::put);
+        persistableNetworkPayloadListService.getMap().forEach(this::put);
         // We are done with the transfer, now let's remove the file
-        persistableNetworkPayloadMapService.removeFile();
-    }
-
-    PersistableNetworkPayloadList getPersistableNetworkPayloadMap() {
-        Map<P2PDataStorage.ByteArray, PersistableNetworkPayload> map = getMap();
-        services.stream()
-                .flatMap(service -> service.getMap().entrySet().stream())
-                .forEach(entry -> map.put(entry.getKey(), entry.getValue()));
-        return persistableNetworkPayloadList;
+        persistableNetworkPayloadListService.removeFile();
     }
 
     public Map<P2PDataStorage.ByteArray, PersistableNetworkPayload> getMap() {
-        return persistableNetworkPayloadList.getMap();
+        return services.stream()
+                .flatMap(service -> service.getMap().entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public void put(P2PDataStorage.ByteArray hashAsByteArray, PersistableNetworkPayload payload) {
         services.stream()
-                .filter(service -> service.isMyPayload(payload))
+                .filter(service -> service.canHandle(payload))
                 .forEach(service -> {
                     service.putIfAbsent(hashAsByteArray, payload);
-                })
-        ;
+                });
     }
 }

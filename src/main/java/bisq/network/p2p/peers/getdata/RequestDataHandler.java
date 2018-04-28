@@ -124,13 +124,13 @@ class RequestDataHandler implements MessageListener {
             // PersistedStoragePayload items don't get removed, so we don't have an issue with the case that
             // an object gets removed in between PreliminaryGetDataRequest and the GetUpdatedDataRequest and we would
             // miss that event if we do not load the full set or use some delta handling.
-            Set<byte[]> excludedKeys = dataStorage.getPersistableNetworkPayloadList().getMap().entrySet().stream()
-                    .map(e -> e.getKey().bytes)
+            Set<byte[]> excludedKeys = dataStorage.getAppendOnlyDataStoreMap().keySet().stream()
+                    .map(e -> e.bytes)
                     .collect(Collectors.toSet());
 
-            Set<byte[]> excludedKeysFromPersistedEntryMap = dataStorage.getPersistedEntryMap().getMap().entrySet()
+            Set<byte[]> excludedKeysFromPersistedEntryMap = dataStorage.getProtectedDataStoreMap().keySet()
                     .stream()
-                    .map(e -> e.getKey().bytes)
+                    .map(e -> e.bytes)
                     .collect(Collectors.toSet());
 
             excludedKeys.addAll(excludedKeysFromPersistedEntryMap);

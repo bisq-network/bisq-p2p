@@ -15,11 +15,10 @@
  * along with Bisq. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package bisq.network.p2p.storage;
+package bisq.network.p2p.storage.persistence;
 
+import bisq.network.p2p.storage.P2PDataStorage;
 import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
-import bisq.network.p2p.storage.persistence.BaseMapStorageService;
-import bisq.network.p2p.storage.persistence.PersistableNetworkPayloadList;
 
 import bisq.common.storage.FileUtil;
 import bisq.common.storage.Storage;
@@ -43,7 +42,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Deprecated
 @Slf4j
-public final class PersistableNetworkPayloadMapService extends BaseMapStorageService<PersistableNetworkPayloadList, PersistableNetworkPayload> {
+public final class PersistableNetworkPayloadListService extends BaseMapStorageService<PersistableNetworkPayloadList, PersistableNetworkPayload> {
     public static final String FILE_NAME = "PersistableNetworkPayloadMap";
 
 
@@ -52,8 +51,8 @@ public final class PersistableNetworkPayloadMapService extends BaseMapStorageSer
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     @Inject
-    public PersistableNetworkPayloadMapService(@Named(Storage.STORAGE_DIR) File storageDir,
-                                               Storage<PersistableNetworkPayloadList> persistableNetworkPayloadMapStorage) {
+    public PersistableNetworkPayloadListService(@Named(Storage.STORAGE_DIR) File storageDir,
+                                                Storage<PersistableNetworkPayloadList> persistableNetworkPayloadMapStorage) {
         super(storageDir, persistableNetworkPayloadMapStorage);
     }
 
@@ -76,22 +75,22 @@ public final class PersistableNetworkPayloadMapService extends BaseMapStorageSer
 
     @Override
     public PersistableNetworkPayload putIfAbsent(P2PDataStorage.ByteArray hash, PersistableNetworkPayload payload) {
-        throw new RuntimeException("putIfAbsent must not be called on deprecated PersistableNetworkPayloadMapService");
+        throw new RuntimeException("putIfAbsent must not be called on deprecated PersistableNetworkPayloadListService");
     }
 
     @Override
     protected void persist() {
-        throw new RuntimeException("persist must not be called on deprecated PersistableNetworkPayloadMapService");
+        throw new RuntimeException("persist must not be called on deprecated PersistableNetworkPayloadListService");
     }
 
     @Override
     public PersistableNetworkPayload remove(P2PDataStorage.ByteArray hash) {
-        throw new RuntimeException("remove must not be called on deprecated PersistableNetworkPayloadMapService");
+        throw new RuntimeException("remove must not be called on deprecated PersistableNetworkPayloadListService");
     }
 
     @Override
     public boolean isMyPayload(PersistableNetworkPayload payload) {
-        throw new RuntimeException("isMyPayload must not be called on deprecated PersistableNetworkPayloadMapService");
+        throw new RuntimeException("isMyPayload must not be called on deprecated PersistableNetworkPayloadListService");
     }
 
     @Override

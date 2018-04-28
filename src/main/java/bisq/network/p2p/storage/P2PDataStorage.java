@@ -101,7 +101,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
 
     private final Broadcaster broadcaster;
     private final AppendOnlyDataStoreService appendOnlyDataStoreService;
-    private final PersistedEntryMapService persistedEntryMapService;
+    private final ProtectedDataStoreService protectedDataStoreService;
 
     @Getter
     private final Map<ByteArray, ProtectedStorageEntry> map = new ConcurrentHashMap<>();
@@ -123,11 +123,11 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     public P2PDataStorage(NetworkNode networkNode,
                           Broadcaster broadcaster,
                           AppendOnlyDataStoreService appendOnlyDataStoreService,
-                          PersistedEntryMapService persistedEntryMapService,
+                          ProtectedDataStoreService protectedDataStoreService,
                           Storage<SequenceNumberMap> sequenceNumberMapStorage) {
         this.broadcaster = broadcaster;
         this.appendOnlyDataStoreService = appendOnlyDataStoreService;
-        this.persistedEntryMapService = persistedEntryMapService;
+        this.protectedDataStoreService = protectedDataStoreService;
 
         networkNode.addMessageListener(this);
         networkNode.addConnectionListener(this);
@@ -152,9 +152,9 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
 
     public synchronized void readFromResources(String postFix) {
         appendOnlyDataStoreService.readFromResources(postFix);
-        persistedEntryMapService.readFromResources(postFix);
+        protectedDataStoreService.readFromResources(postFix);
 
-        map.putAll(persistedEntryMapService.getMap());
+        map.putAll(protectedDataStoreService.getMap());
     }
 
 
@@ -198,12 +198,12 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
         }, CHECK_TTL_INTERVAL_SEC);
     }
 
-    public PersistableNetworkPayloadList getPersistableNetworkPayloadList() {
-        return appendOnlyDataStoreService.getPersistableNetworkPayloadMap();
+    public Map<ByteArray, PersistableNetworkPayload> getAppendOnlyDataStoreMap() {
+        return appendOnlyDataStoreService.getMap();
     }
 
-    public PersistedEntryMap getPersistedEntryMap() {
-        return persistedEntryMapService.getEnvelope();
+    public Map<P2PDataStorage.ByteArray, ProtectedStorageEntry> getProtectedDataStoreMap() {
+        return protectedDataStoreService.getMap();
     }
 
 
@@ -310,7 +310,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
         final byte[] hash = payload.getHash();
         if (payload.verifyHashSize()) {
             final ByteArray hashAsByteArray = new ByteArray(hash);
-            boolean containsKey = getPersistableNetworkPayloadList().containsKey(hashAsByteArray);
+            boolean containsKey = getAppendOnlyDataStoreMap().containsKey(hashAsByteArray);
             if (!containsKey || reBroadcast) {
                 if (!(payload instanceof DateTolerantPayload) || !checkDate || ((DateTolerantPayload) payload).isDateInTolerance()) {
                     if (!containsKey) {
@@ -381,7 +381,8 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
             }
 
             if (protectedStoragePayload instanceof PersistablePayload) {
-                ProtectedStorageEntry previous = persistedEntryMapService.putIfAbsent(hashOfPayload, protectedStorageEntry);
+                ByteArray compactHash = getCompactHashAsByteArray(protectedStoragePayload);
+                ProtectedStorageEntry previous = protectedDataStoreService.putIfAbsent(compactHash, protectedStorageEntry);
                 if (previous == null)
                     persistedEntryMapListeners.forEach(e -> e.onAdded(protectedStorageEntry));
             }
@@ -457,13 +458,14 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
 
             broadcast(new RemoveDataMessage(protectedStorageEntry), sender, null, isDataOwner);
 
-            if (protectedStoragePayload instanceof PersistablePayload &&
-                    persistedEntryMapService.contains(hashOfPayload)) {
-
-                persistedEntryMapService.remove(hashOfPayload);
-                persistedEntryMapListeners.forEach(e -> e.onRemoved(protectedStorageEntry));
-            } else {
-                log.info("We cannot remove the protectedStorageEntry from the persistedEntryMap as it does not exist.");
+            if (protectedStoragePayload instanceof PersistablePayload) {
+                ByteArray compactHash = getCompactHashAsByteArray(protectedStoragePayload);
+                ProtectedStorageEntry previous = protectedDataStoreService.remove(compactHash);
+                if (previous != null) {
+                    persistedEntryMapListeners.forEach(e -> e.onRemoved(protectedStorageEntry));
+                } else {
+                    log.info("We cannot remove the protectedStorageEntry from the persistedEntryMap as it does not exist.");
+                }
             }
         } else {
             log.debug("remove failed");
@@ -714,6 +716,14 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
 
     private ByteArray get32ByteHashAsByteArray(NetworkPayload data) {
         return new ByteArray(P2PDataStorage.get32ByteHash(data));
+    }
+
+    private ByteArray getCompactHashAsByteArray(ProtectedStoragePayload protectedStoragePayload) {
+        return new ByteArray(getCompactHash(protectedStoragePayload));
+    }
+
+    private byte[] getCompactHash(ProtectedStoragePayload protectedStoragePayload) {
+        return Hash.getSha256Ripemd160hash(protectedStoragePayload.toProtoMessage().toByteArray());
     }
 
     // Get a new map with entries older than PURGE_AGE_DAYS purged from the given map.

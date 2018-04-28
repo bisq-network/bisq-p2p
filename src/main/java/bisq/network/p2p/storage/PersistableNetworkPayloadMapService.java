@@ -19,7 +19,6 @@ package bisq.network.p2p.storage;
 
 import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
 
-import bisq.common.proto.persistable.PersistablePayload;
 import bisq.common.storage.FileUtil;
 import bisq.common.storage.Storage;
 
@@ -89,6 +88,11 @@ public final class PersistableNetworkPayloadMapService extends BaseMapStorageSer
     }
 
     @Override
+    public boolean isMyPayload(PersistableNetworkPayload payload) {
+        throw new RuntimeException("isMyPayload must not be called on deprecated PersistableNetworkPayloadMapService");
+    }
+
+    @Override
     public String getFileName() {
         return FILE_NAME;
     }
@@ -96,11 +100,6 @@ public final class PersistableNetworkPayloadMapService extends BaseMapStorageSer
     @Override
     public Map<P2PDataStorage.ByteArray, PersistableNetworkPayload> getMap() {
         return envelope.getMap();
-    }
-
-    @Override
-    public boolean isMyPayload(PersistablePayload payload) {
-        return payload instanceof PersistableNetworkPayload;
     }
 
 

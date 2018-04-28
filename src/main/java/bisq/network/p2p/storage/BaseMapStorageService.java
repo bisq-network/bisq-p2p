@@ -68,7 +68,7 @@ public abstract class BaseMapStorageService<T extends PersistableEnvelope, R ext
 
     public abstract Map<P2PDataStorage.ByteArray, R> getMap();
 
-    abstract public boolean isMyPayload(PersistablePayload payload);
+    abstract public boolean isMyPayload(R payload);
 
     public R putIfAbsent(P2PDataStorage.ByteArray hash, R payload) {
         R previous = getMap().putIfAbsent(hash, payload);

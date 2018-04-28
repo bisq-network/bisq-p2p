@@ -17,7 +17,7 @@
 
 package bisq.network.p2p.storage;
 
-import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
+import bisq.network.p2p.storage.payload.ProtectedStorageEntry;
 
 import bisq.common.proto.persistable.PersistableEnvelope;
 
@@ -31,12 +31,8 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class AppendOnlyDataStoreService {
-    private List<BaseMapStorageService<? extends PersistableEnvelope, PersistableNetworkPayload>> services = new ArrayList<>();
-
-    // We do not add PersistableNetworkPayloadMapService to the services list as it it deprecated and used only to
-    // transfer old persisted data to the new data structure.
-    private PersistableNetworkPayloadMapService persistableNetworkPayloadMapService;
+public class ProtectedDataStoreService {
+    private List<BaseMapStorageService<? extends PersistableEnvelope, ProtectedStorageEntry>> services = new ArrayList<>();
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -44,40 +40,46 @@ public class AppendOnlyDataStoreService {
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     @Inject
-    public AppendOnlyDataStoreService(PersistableNetworkPayloadMapService persistableNetworkPayloadMapService) {
-        this.persistableNetworkPayloadMapService = persistableNetworkPayloadMapService;
+    public ProtectedDataStoreService() {
     }
 
-    public void addService(BaseMapStorageService<? extends PersistableEnvelope, PersistableNetworkPayload> service) {
+    public void addService(BaseMapStorageService<? extends PersistableEnvelope, ProtectedStorageEntry> service) {
         services.add(service);
     }
 
     void readFromResources(String postFix) {
         services.forEach(service -> service.readFromResources(postFix));
-
-        transferDeprecatedDataStructure();
     }
 
-    private void transferDeprecatedDataStructure() {
-        // We read the file if it exists in the db folder
-        persistableNetworkPayloadMapService.readPersistableEnvelope();
-        // Transfer the content to the new services
-        persistableNetworkPayloadMapService.getMap().forEach(this::put);
-        // We are done with the transfer, now let's remove the file
-        persistableNetworkPayloadMapService.removeFile();
-    }
-
-    public Map<P2PDataStorage.ByteArray, PersistableNetworkPayload> getMap() {
+    public Map<P2PDataStorage.ByteArray, ProtectedStorageEntry> getMap() {
         return services.stream()
                 .flatMap(service -> service.getMap().entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public void put(P2PDataStorage.ByteArray hashAsByteArray, PersistableNetworkPayload payload) {
+    public void put(P2PDataStorage.ByteArray hash, ProtectedStorageEntry entry) {
         services.stream()
-                .filter(service -> service.isMyPayload(payload))
+                .filter(service -> service.isMyPayload(entry))
                 .forEach(service -> {
-                    service.putIfAbsent(hashAsByteArray, payload);
+                    service.putIfAbsent(hash, entry);
                 });
+    }
+
+    public ProtectedStorageEntry putIfAbsent(P2PDataStorage.ByteArray hash, ProtectedStorageEntry entry) {
+        Map<P2PDataStorage.ByteArray, ProtectedStorageEntry> map = getMap();
+        if (!map.containsKey(hash)) {
+            put(hash, entry);
+            return null;
+        } else {
+            return map.get(hash);
+        }
+    }
+
+    public boolean containsKey(P2PDataStorage.ByteArray hash) {
+        return getMap().containsKey(hash);
+    }
+
+    public ProtectedStorageEntry remove(P2PDataStorage.ByteArray hash) {
+        return getMap().remove(hash);
     }
 }

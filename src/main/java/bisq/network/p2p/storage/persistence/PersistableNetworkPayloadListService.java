@@ -42,7 +42,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Deprecated
 @Slf4j
-public final class PersistableNetworkPayloadListService extends BaseMapStorageService<PersistableNetworkPayloadList, PersistableNetworkPayload> {
+public final class PersistableNetworkPayloadListService extends StoreService<PersistableNetworkPayloadList, PersistableNetworkPayload> {
     public static final String FILE_NAME = "PersistableNetworkPayloadMap";
 
 
@@ -89,7 +89,7 @@ public final class PersistableNetworkPayloadListService extends BaseMapStorageSe
     }
 
     @Override
-    public boolean isMyPayload(PersistableNetworkPayload payload) {
+    public boolean canHandle(PersistableNetworkPayload payload) {
         throw new RuntimeException("isMyPayload must not be called on deprecated PersistableNetworkPayloadListService");
     }
 
@@ -100,7 +100,7 @@ public final class PersistableNetworkPayloadListService extends BaseMapStorageSe
 
     @Override
     public Map<P2PDataStorage.ByteArray, PersistableNetworkPayload> getMap() {
-        return envelope.getMap();
+        return store.getMap();
     }
 
 
@@ -109,7 +109,7 @@ public final class PersistableNetworkPayloadListService extends BaseMapStorageSe
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    protected PersistableNetworkPayloadList createEnvelope() {
+    protected PersistableNetworkPayloadList createStore() {
         return new PersistableNetworkPayloadList();
     }
 }

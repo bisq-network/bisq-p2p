@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ProtectedDataStoreService {
-    private List<BaseMapStorageService<? extends PersistableEnvelope, ProtectedStorageEntry>> services = new ArrayList<>();
+    private List<StoreService<? extends PersistableEnvelope, ProtectedStorageEntry>> services = new ArrayList<>();
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -44,7 +44,7 @@ public class ProtectedDataStoreService {
     public ProtectedDataStoreService() {
     }
 
-    public void addService(BaseMapStorageService<? extends PersistableEnvelope, ProtectedStorageEntry> service) {
+    public void addService(StoreService<? extends PersistableEnvelope, ProtectedStorageEntry> service) {
         services.add(service);
     }
 
@@ -60,7 +60,7 @@ public class ProtectedDataStoreService {
 
     public void put(P2PDataStorage.ByteArray hash, ProtectedStorageEntry entry) {
         services.stream()
-                .filter(service -> service.isMyPayload(entry))
+                .filter(service -> service.canHandle(entry))
                 .forEach(service -> {
                     service.putIfAbsent(hash, entry);
                 });

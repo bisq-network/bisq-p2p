@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class AppendOnlyDataStoreService {
-    private List<BaseMapStorageService<? extends PersistableEnvelope, PersistableNetworkPayload>> services = new ArrayList<>();
+    private List<StoreService<? extends PersistableEnvelope, PersistableNetworkPayload>> services = new ArrayList<>();
 
     // We do not add PersistableNetworkPayloadListService to the services list as it it deprecated and used only to
     // transfer old persisted data to the new data structure.
@@ -49,7 +49,7 @@ public class AppendOnlyDataStoreService {
         this.persistableNetworkPayloadListService = persistableNetworkPayloadListService;
     }
 
-    public void addService(BaseMapStorageService<? extends PersistableEnvelope, PersistableNetworkPayload> service) {
+    public void addService(StoreService<? extends PersistableEnvelope, PersistableNetworkPayload> service) {
         services.add(service);
     }
 
@@ -61,7 +61,7 @@ public class AppendOnlyDataStoreService {
 
     private void transferDeprecatedDataStructure() {
         // We read the file if it exists in the db folder
-        persistableNetworkPayloadListService.readPersistableEnvelope();
+        persistableNetworkPayloadListService.readStore();
         // Transfer the content to the new services
         persistableNetworkPayloadListService.getMap().forEach(this::put);
         // We are done with the transfer, now let's remove the file
@@ -76,7 +76,7 @@ public class AppendOnlyDataStoreService {
 
     public void put(P2PDataStorage.ByteArray hashAsByteArray, PersistableNetworkPayload payload) {
         services.stream()
-                .filter(service -> service.isMyPayload(payload))
+                .filter(service -> service.canHandle(payload))
                 .forEach(service -> {
                     service.putIfAbsent(hashAsByteArray, payload);
                 });

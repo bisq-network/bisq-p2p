@@ -468,7 +468,7 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
 
             if (protectedStoragePayload instanceof PersistablePayload) {
                 ByteArray compactHash = getCompactHashAsByteArray(protectedStoragePayload);
-                ProtectedStorageEntry previous = protectedDataStoreService.remove(compactHash);
+                ProtectedStorageEntry previous = protectedDataStoreService.remove(compactHash, protectedStorageEntry);
                 if (previous != null) {
                     protectedDataStoreListeners.forEach(e -> e.onRemoved(protectedStorageEntry));
                 } else {

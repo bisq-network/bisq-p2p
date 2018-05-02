@@ -80,7 +80,13 @@ public class ProtectedDataStoreService {
         return getMap().containsKey(hash);
     }
 
-    public ProtectedStorageEntry remove(P2PDataStorage.ByteArray hash) {
-        return getMap().remove(hash);
+    public ProtectedStorageEntry remove(P2PDataStorage.ByteArray hash, ProtectedStorageEntry protectedStorageEntry) {
+        final ProtectedStorageEntry[] result = new ProtectedStorageEntry[1];
+        services.stream()
+                .filter(service -> service.canHandle(protectedStorageEntry))
+                .forEach(service -> {
+                    result[0] = service.remove(hash);
+                });
+        return result[0];
     }
 }

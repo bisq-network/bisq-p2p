@@ -211,10 +211,6 @@ public class PeerManager implements ConnectionListener, PersistedDataHost {
 
     @Override
     public void onConnection(Connection connection) {
-        Log.logIfStressTests("onConnection to peer " +
-                (connection.getPeersNodeAddressOptional().isPresent() ? connection.getPeersNodeAddressOptional().get() : "PeersNode unknown") +
-                " / No. of connections: " + networkNode.getAllConnections().size());
-
         final boolean seedNode = isSeedNode(connection);
 
         final Optional<NodeAddress> addressOptional = connection.getPeersNodeAddressOptional();
@@ -237,10 +233,6 @@ public class PeerManager implements ConnectionListener, PersistedDataHost {
     @Override
     public void onDisconnect(CloseConnectionReason closeConnectionReason, Connection connection) {
         log.info("onDisconnect called: nodeAddress={}, closeConnectionReason={}", connection.getPeersNodeAddressOptional(), closeConnectionReason);
-        Log.logIfStressTests("onDisconnect of peer " +
-                (connection.getPeersNodeAddressOptional().isPresent() ? connection.getPeersNodeAddressOptional().get() : "PeersNode unknown") +
-                " / No. of connections: " + networkNode.getAllConnections().size() +
-                " / closeConnectionReason: " + closeConnectionReason);
 
         final Optional<NodeAddress> addressOptional = connection.getPeersNodeAddressOptional();
         log.debug("onDisconnect: peer = {}{} / closeConnectionReason: {}",

@@ -317,12 +317,6 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
                                     log.debug("We remove the data as the data owner got disconnected with " +
                                             "closeConnectionReason=" + closeConnectionReason);
 
-                                    //noinspection ConstantConditions
-                                    Log.logIfStressTests("We remove the data as the data owner got disconnected with " +
-                                            "closeConnectionReason=" + closeConnectionReason +
-                                            " / isIntended=" + closeConnectionReason.isIntended +
-                                            " / peer=" + (connection.getPeersNodeAddressOptional().isPresent() ? connection.getPeersNodeAddressOptional().get() : "PeersNode unknown"));
-
                                     // We only set the data back by half of the TTL and remove the data only if is has
                                     // expired after that back dating.
                                     // We might get connection drops which are not caused by the node going offline, so

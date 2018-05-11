@@ -4,19 +4,18 @@ plugins {
 }
 
 group = 'network.bisq'
-version = '0.7.0'
+version = '-SNAPSHOT'
 
 sourceCompatibility = 1.8
 
 repositories {
-    mavenLocal()
     jcenter()
     maven { url 'https://jitpack.io' }
     maven { url 'https://raw.githubusercontent.com/JesusMcCloud/tor-binary/master/release/' }
 }
 
 dependencies {
-    compile 'network.bisq:bisq-common:0.7.0'
+    compile 'network.bisq:bisq-common:-SNAPSHOT'
     compile('com.github.JesusMcCloud.netlayer:tor.native:0.4.2') {
         exclude(module: 'slf4j-api')
     }

@@ -9,6 +9,7 @@ version = '-SNAPSHOT'
 sourceCompatibility = 1.8
 
 repositories {
+    mavenLocal()
     jcenter()
     maven { url 'https://jitpack.io' }
     maven { url 'https://raw.githubusercontent.com/JesusMcCloud/tor-binary/master/release/' }

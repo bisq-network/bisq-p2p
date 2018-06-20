@@ -17,13 +17,22 @@
 
 package bisq.network.p2p;
 
+import bisq.network.p2p.storage.payload.CapabilityRequiringPayload;
+import bisq.network.p2p.storage.payload.ExpirablePayload;
+
+import bisq.common.app.Capabilities;
 import bisq.common.app.Version;
 import bisq.common.proto.ProtoUtil;
 import bisq.common.proto.network.NetworkEnvelope;
 
 import io.bisq.generated.protobuffer.PB;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
@@ -32,23 +41,28 @@ import javax.annotation.Nullable;
 
 @EqualsAndHashCode(callSuper = true)
 @Value
-public final class AckMessage extends NetworkEnvelope {
+public final class AckMessage extends NetworkEnvelope implements MailboxMessage, ExpirablePayload, CapabilityRequiringPayload {
     private final String uid;
+    private final NodeAddress senderNodeAddress;
     private final AckMessageSourceType sourceType;       //e.g. TradeMessage, DisputeMessage,...
+    private final String sourceMsgClassName;
     private final String sourceUid;     // uid of source (TradeMessage)
     private final String sourceId;      // id of source (tradeId, disputeId)
     private final boolean result;       // true if source message was processed successfully
     @Nullable
     private final String errorMessage;  // optional error message if source message processing failed
 
-    public AckMessage(String uid,
+    public AckMessage(NodeAddress senderNodeAddress,
                       AckMessageSourceType sourceType,
+                      String sourceMsgClassName,
                       String sourceUid,
                       String sourceId,
                       boolean result,
                       String errorMessage) {
-        this(uid,
+        this(UUID.randomUUID().toString(),
+                senderNodeAddress,
                 sourceType,
+                sourceMsgClassName,
                 sourceUid,
                 sourceId,
                 result,
@@ -62,7 +76,9 @@ public final class AckMessage extends NetworkEnvelope {
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     private AckMessage(String uid,
+                       NodeAddress senderNodeAddress,
                        AckMessageSourceType sourceType,
+                       String sourceMsgClassName,
                        String sourceUid,
                        String sourceId,
                        boolean result,
@@ -70,7 +86,9 @@ public final class AckMessage extends NetworkEnvelope {
                        int messageVersion) {
         super(messageVersion);
         this.uid = uid;
+        this.senderNodeAddress = senderNodeAddress;
         this.sourceType = sourceType;
+        this.sourceMsgClassName = sourceMsgClassName;
         this.sourceUid = sourceUid;
         this.sourceId = sourceId;
         this.result = result;
@@ -82,7 +100,9 @@ public final class AckMessage extends NetworkEnvelope {
     public PB.NetworkEnvelope toProtoNetworkEnvelope() {
         PB.AckMessage.Builder builder = PB.AckMessage.newBuilder()
                 .setUid(uid)
+                .setSenderNodeAddress(senderNodeAddress.toProtoMessage())
                 .setSourceType(sourceType.name())
+                .setSourceMsgClassName(sourceMsgClassName)
                 .setSourceUid(sourceUid)
                 .setSourceId(sourceId)
                 .setResult(result);
@@ -93,11 +113,40 @@ public final class AckMessage extends NetworkEnvelope {
     public static AckMessage fromProto(PB.AckMessage proto, int messageVersion) {
         AckMessageSourceType sourceType = ProtoUtil.enumFromProto(AckMessageSourceType.class, proto.getSourceType());
         return new AckMessage(proto.getUid(),
+                NodeAddress.fromProto(proto.getSenderNodeAddress()),
                 sourceType,
+                proto.getSourceMsgClassName(),
                 proto.getSourceUid(),
                 proto.getSourceId(),
                 proto.getResult(),
                 proto.getErrorMessage().isEmpty() ? null : proto.getErrorMessage(),
                 messageVersion);
+    }
+
+    @Override
+    public List<Integer> getRequiredCapabilities() {
+        return new ArrayList<>(Collections.singletonList(
+                Capabilities.Capability.ACK_MSG.ordinal()
+        ));
+    }
+
+
+    @Override
+    public String toString() {
+        return "AckMessage{" +
+                "\n     uid='" + uid + '\'' +
+                ",\n     senderNodeAddress=" + senderNodeAddress +
+                ",\n     sourceType=" + sourceType +
+                ",\n     sourceMsgClassName='" + sourceMsgClassName + '\'' +
+                ",\n     sourceUid='" + sourceUid + '\'' +
+                ",\n     sourceId='" + sourceId + '\'' +
+                ",\n     result=" + result +
+                ",\n     errorMessage='" + errorMessage + '\'' +
+                "\n} " + super.toString();
+    }
+
+    @Override
+    public long getTTL() {
+        return TimeUnit.DAYS.toMillis(10);
     }
 }

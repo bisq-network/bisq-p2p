@@ -458,7 +458,8 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
 
     public void sendEncryptedDirectMessage(NodeAddress peerNodeAddress, PubKeyRing pubKeyRing, NetworkEnvelope message,
                                            SendDirectMessageListener sendDirectMessageListener) {
-        Log.traceCall();
+        //TODO for testing
+        log.error("sendEncryptedDirectMessage message " + message);
         checkNotNull(peerNodeAddress, "PeerAddress must not be null (sendEncryptedDirectMessage)");
         if (isBootstrapped()) {
             doSendEncryptedDirectMessage(peerNodeAddress, pubKeyRing, message, sendDirectMessageListener);
@@ -548,7 +549,8 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
     public void sendEncryptedMailboxMessage(NodeAddress peersNodeAddress, PubKeyRing peersPubKeyRing,
                                             NetworkEnvelope message,
                                             SendMailboxMessageListener sendMailboxMessageListener) {
-        Log.traceCall("message " + message);
+        //TODO for testing
+        log.error("sendEncryptedMailboxMessage message " + message);
         checkNotNull(peersNodeAddress,
                 "PeerAddress must not be null (sendEncryptedMailboxMessage)");
         checkNotNull(networkNode.getNodeAddress(),

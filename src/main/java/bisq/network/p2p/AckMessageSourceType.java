@@ -17,7 +17,7 @@
 
 package bisq.network.p2p;
 
-public enum ConfirmationSourceType {
+public enum AckMessageSourceType {
     UNDEFINED,
     OFFER_MESSAGE,
     TRADE_MESSAGE,

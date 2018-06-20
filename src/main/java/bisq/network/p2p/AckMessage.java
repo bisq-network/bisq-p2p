@@ -32,21 +32,21 @@ import javax.annotation.Nullable;
 
 @EqualsAndHashCode(callSuper = true)
 @Value
-public final class ConfirmationMessage extends NetworkEnvelope {
+public final class AckMessage extends NetworkEnvelope {
     private final String uid;
-    private final ConfirmationSourceType sourceType;       //e.g. TradeMessage, DisputeMessage,...
+    private final AckMessageSourceType sourceType;       //e.g. TradeMessage, DisputeMessage,...
     private final String sourceUid;     // uid of source (TradeMessage)
     private final String sourceId;      // id of source (tradeId, disputeId)
     private final boolean result;       // true if source message was processed successfully
     @Nullable
     private final String errorMessage;  // optional error message if source message processing failed
 
-    public ConfirmationMessage(String uid,
-                               ConfirmationSourceType sourceType,
-                               String sourceUid,
-                               String sourceId,
-                               boolean result,
-                               String errorMessage) {
+    public AckMessage(String uid,
+                      AckMessageSourceType sourceType,
+                      String sourceUid,
+                      String sourceId,
+                      boolean result,
+                      String errorMessage) {
         this(uid,
                 sourceType,
                 sourceUid,
@@ -61,13 +61,13 @@ public final class ConfirmationMessage extends NetworkEnvelope {
     // PROTO BUFFER
     ///////////////////////////////////////////////////////////////////////////////////////////
 
-    private ConfirmationMessage(String uid,
-                                ConfirmationSourceType sourceType,
-                                String sourceUid,
-                                String sourceId,
-                                boolean result,
-                                @Nullable String errorMessage,
-                                int messageVersion) {
+    private AckMessage(String uid,
+                       AckMessageSourceType sourceType,
+                       String sourceUid,
+                       String sourceId,
+                       boolean result,
+                       @Nullable String errorMessage,
+                       int messageVersion) {
         super(messageVersion);
         this.uid = uid;
         this.sourceType = sourceType;
@@ -80,19 +80,19 @@ public final class ConfirmationMessage extends NetworkEnvelope {
 
     @Override
     public PB.NetworkEnvelope toProtoNetworkEnvelope() {
-        PB.ConfirmationMessage.Builder builder = PB.ConfirmationMessage.newBuilder()
+        PB.AckMessage.Builder builder = PB.AckMessage.newBuilder()
                 .setUid(uid)
                 .setSourceType(sourceType.name())
                 .setSourceUid(sourceUid)
                 .setSourceId(sourceId)
                 .setResult(result);
         Optional.ofNullable(errorMessage).ifPresent(builder::setErrorMessage);
-        return getNetworkEnvelopeBuilder().setConfirmationMessage(builder).build();
+        return getNetworkEnvelopeBuilder().setAckMessage(builder).build();
     }
 
-    public static ConfirmationMessage fromProto(PB.ConfirmationMessage proto, int messageVersion) {
-        ConfirmationSourceType sourceType = ProtoUtil.enumFromProto(ConfirmationSourceType.class, proto.getSourceType());
-        return new ConfirmationMessage(proto.getUid(),
+    public static AckMessage fromProto(PB.AckMessage proto, int messageVersion) {
+        AckMessageSourceType sourceType = ProtoUtil.enumFromProto(AckMessageSourceType.class, proto.getSourceType());
+        return new AckMessage(proto.getUid(),
                 sourceType,
                 proto.getSourceUid(),
                 proto.getSourceId(),

@@ -456,6 +456,7 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
     // DirectMessages
     ///////////////////////////////////////////////////////////////////////////////////////////
 
+    // TODO OfferAvailabilityResponse is called twice!
     public void sendEncryptedDirectMessage(NodeAddress peerNodeAddress, PubKeyRing pubKeyRing, NetworkEnvelope message,
                                            SendDirectMessageListener sendDirectMessageListener) {
         //TODO for testing

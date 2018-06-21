@@ -24,6 +24,7 @@ import bisq.common.app.Capabilities;
 import bisq.common.app.Version;
 import bisq.common.proto.ProtoUtil;
 import bisq.common.proto.network.NetworkEnvelope;
+import bisq.common.proto.persistable.PersistablePayload;
 
 import io.bisq.generated.protobuffer.PB;
 
@@ -39,16 +40,19 @@ import lombok.Value;
 
 import javax.annotation.Nullable;
 
-@EqualsAndHashCode(callSuper = true)
+// We exclude uid from hashcode and equals to detect duplicate entries of the same AckMessage
+@EqualsAndHashCode(callSuper = true, exclude = {"uid"})
 @Value
-public final class AckMessage extends NetworkEnvelope implements MailboxMessage, ExpirablePayload, CapabilityRequiringPayload {
+public final class AckMessage extends NetworkEnvelope implements MailboxMessage, PersistablePayload,
+        ExpirablePayload, CapabilityRequiringPayload {
+
     private final String uid;
     private final NodeAddress senderNodeAddress;
     private final AckMessageSourceType sourceType;       //e.g. TradeMessage, DisputeMessage,...
     private final String sourceMsgClassName;
     private final String sourceUid;     // uid of source (TradeMessage)
     private final String sourceId;      // id of source (tradeId, disputeId)
-    private final boolean result;       // true if source message was processed successfully
+    private final boolean success;       // true if source message was processed successfully
     @Nullable
     private final String errorMessage;  // optional error message if source message processing failed
 
@@ -57,7 +61,7 @@ public final class AckMessage extends NetworkEnvelope implements MailboxMessage,
                       String sourceMsgClassName,
                       String sourceUid,
                       String sourceId,
-                      boolean result,
+                      boolean success,
                       String errorMessage) {
         this(UUID.randomUUID().toString(),
                 senderNodeAddress,
@@ -65,7 +69,7 @@ public final class AckMessage extends NetworkEnvelope implements MailboxMessage,
                 sourceMsgClassName,
                 sourceUid,
                 sourceId,
-                result,
+                success,
                 errorMessage,
                 Version.getP2PMessageVersion());
     }
@@ -81,7 +85,7 @@ public final class AckMessage extends NetworkEnvelope implements MailboxMessage,
                        String sourceMsgClassName,
                        String sourceUid,
                        String sourceId,
-                       boolean result,
+                       boolean success,
                        @Nullable String errorMessage,
                        int messageVersion) {
         super(messageVersion);
@@ -91,10 +95,22 @@ public final class AckMessage extends NetworkEnvelope implements MailboxMessage,
         this.sourceMsgClassName = sourceMsgClassName;
         this.sourceUid = sourceUid;
         this.sourceId = sourceId;
-        this.result = result;
+        this.success = success;
         this.errorMessage = errorMessage;
     }
 
+    public PB.AckMessage toProtoMessage() {
+        PB.AckMessage.Builder builder = PB.AckMessage.newBuilder()
+                .setUid(uid)
+                .setSenderNodeAddress(senderNodeAddress.toProtoMessage())
+                .setSourceType(sourceType.name())
+                .setSourceMsgClassName(sourceMsgClassName)
+                .setSourceUid(sourceUid)
+                .setSourceId(sourceId)
+                .setSuccess(success);
+        Optional.ofNullable(errorMessage).ifPresent(builder::setErrorMessage);
+        return builder.build();
+    }
 
     @Override
     public PB.NetworkEnvelope toProtoNetworkEnvelope() {
@@ -105,7 +121,7 @@ public final class AckMessage extends NetworkEnvelope implements MailboxMessage,
                 .setSourceMsgClassName(sourceMsgClassName)
                 .setSourceUid(sourceUid)
                 .setSourceId(sourceId)
-                .setResult(result);
+                .setSuccess(success);
         Optional.ofNullable(errorMessage).ifPresent(builder::setErrorMessage);
         return getNetworkEnvelopeBuilder().setAckMessage(builder).build();
     }
@@ -118,10 +134,15 @@ public final class AckMessage extends NetworkEnvelope implements MailboxMessage,
                 proto.getSourceMsgClassName(),
                 proto.getSourceUid(),
                 proto.getSourceId(),
-                proto.getResult(),
+                proto.getSuccess(),
                 proto.getErrorMessage().isEmpty() ? null : proto.getErrorMessage(),
                 messageVersion);
     }
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    // API
+    ///////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
     public List<Integer> getRequiredCapabilities() {
@@ -130,6 +151,10 @@ public final class AckMessage extends NetworkEnvelope implements MailboxMessage,
         ));
     }
 
+    @Override
+    public long getTTL() {
+        return TimeUnit.DAYS.toMillis(10);
+    }
 
     @Override
     public String toString() {
@@ -140,13 +165,8 @@ public final class AckMessage extends NetworkEnvelope implements MailboxMessage,
                 ",\n     sourceMsgClassName='" + sourceMsgClassName + '\'' +
                 ",\n     sourceUid='" + sourceUid + '\'' +
                 ",\n     sourceId='" + sourceId + '\'' +
-                ",\n     result=" + result +
+                ",\n     success=" + success +
                 ",\n     errorMessage='" + errorMessage + '\'' +
                 "\n} " + super.toString();
-    }
-
-    @Override
-    public long getTTL() {
-        return TimeUnit.DAYS.toMillis(10);
     }
 }

@@ -660,7 +660,11 @@ public class PeerManager implements ConnectionListener, PersistedDataHost {
         // networkNode.getConfirmedConnections includes:
         // filter(connection -> connection.getPeersNodeAddressOptional().isPresent())
         return networkNode.getConfirmedConnections().stream()
-                .map(c -> new Peer(c.getPeersNodeAddressOptional().get()))
+                .map(connection -> {
+                    Peer peer = new Peer(connection.getPeersNodeAddressOptional().get(), connection.getSupportedCapabilities());
+                    connection.addSupportedCapabilitiesListenerAsWeakReference(peer);
+                    return peer;
+                })
                 .collect(Collectors.toSet());
     }
 

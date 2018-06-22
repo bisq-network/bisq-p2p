@@ -31,6 +31,7 @@ import bisq.network.p2p.peers.Broadcaster;
 import bisq.network.p2p.peers.PeerManager;
 import bisq.network.p2p.peers.getdata.RequestDataManager;
 import bisq.network.p2p.peers.keepalive.KeepAliveManager;
+import bisq.network.p2p.peers.peerexchange.Peer;
 import bisq.network.p2p.peers.peerexchange.PeerExchangeManager;
 import bisq.network.p2p.seed.SeedNodeRepository;
 import bisq.network.p2p.storage.HashMapChangedListener;
@@ -38,6 +39,7 @@ import bisq.network.p2p.storage.P2PDataStorage;
 import bisq.network.p2p.storage.messages.AddDataMessage;
 import bisq.network.p2p.storage.messages.BroadcastMessage;
 import bisq.network.p2p.storage.messages.RefreshOfferMessage;
+import bisq.network.p2p.storage.payload.CapabilityRequiringPayload;
 import bisq.network.p2p.storage.payload.MailboxStoragePayload;
 import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
 import bisq.network.p2p.storage.payload.ProtectedMailboxStorageEntry;
@@ -459,8 +461,6 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
     // TODO OfferAvailabilityResponse is called twice!
     public void sendEncryptedDirectMessage(NodeAddress peerNodeAddress, PubKeyRing pubKeyRing, NetworkEnvelope message,
                                            SendDirectMessageListener sendDirectMessageListener) {
-        //TODO for testing
-        log.error("sendEncryptedDirectMessage message " + message);
         checkNotNull(peerNodeAddress, "PeerAddress must not be null (sendEncryptedDirectMessage)");
         if (isBootstrapped()) {
             doSendEncryptedDirectMessage(peerNodeAddress, pubKeyRing, message, sendDirectMessageListener);
@@ -550,8 +550,6 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
     public void sendEncryptedMailboxMessage(NodeAddress peersNodeAddress, PubKeyRing peersPubKeyRing,
                                             NetworkEnvelope message,
                                             SendMailboxMessageListener sendMailboxMessageListener) {
-        //TODO for testing
-        log.error("sendEncryptedMailboxMessage message " + message);
         checkNotNull(peersNodeAddress,
                 "PeerAddress must not be null (sendEncryptedMailboxMessage)");
         checkNotNull(networkNode.getNodeAddress(),
@@ -559,48 +557,90 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
         checkArgument(!keyRing.getPubKeyRing().equals(peersPubKeyRing),
                 "We got own keyring instead of that from peer");
 
-        if (isBootstrapped()) {
-            if (!networkNode.getAllConnections().isEmpty()) {
-                try {
-                    log.debug("\n\nEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\n" +
-                            "Encrypt message:\nmessage={}"
-                            + "\nEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\n", message);
-                    PrefixedSealedAndSignedMessage prefixedSealedAndSignedMessage = new PrefixedSealedAndSignedMessage(
-                            networkNode.getNodeAddress(),
-                            encryptionService.encryptAndSign(peersPubKeyRing, message),
-                            peersNodeAddress.getAddressPrefixHash(),
-                            UUID.randomUUID().toString());
-                    SettableFuture<Connection> future = networkNode.sendMessage(peersNodeAddress, prefixedSealedAndSignedMessage);
-                    Futures.addCallback(future, new FutureCallback<Connection>() {
-                        @Override
-                        public void onSuccess(@Nullable Connection connection) {
-                            log.trace("SendEncryptedMailboxMessage onSuccess");
-                            sendMailboxMessageListener.onArrived();
-                        }
-
-                        @Override
-                        public void onFailure(@NotNull Throwable throwable) {
-                            log.info("We cannot send message to peer. Peer might be offline. We will store message in mailbox. peersNodeAddress=" + peersNodeAddress);
-                            PublicKey receiverStoragePublicKey = peersPubKeyRing.getSignaturePubKey();
-                            addMailboxData(new MailboxStoragePayload(prefixedSealedAndSignedMessage,
-                                            keyRing.getSignatureKeyPair().getPublic(),
-                                            receiverStoragePublicKey),
-                                    receiverStoragePublicKey,
-                                    sendMailboxMessageListener);
-                        }
-                    });
-                } catch (CryptoException e) {
-                    log.error("sendEncryptedMessage failed");
-                    e.printStackTrace();
-                    sendMailboxMessageListener.onFault("sendEncryptedMailboxMessage failed " + e);
-                }
-            } else {
-                sendMailboxMessageListener.onFault("There are no P2P network nodes connected. " +
-                        "Please check your internet connection.");
-            }
-        } else {
+        if (!isBootstrapped())
             throw new NetworkNotReadyException();
+
+        if (networkNode.getAllConnections().isEmpty()) {
+            sendMailboxMessageListener.onFault("There are no P2P network nodes connected. " +
+                    "Please check your internet connection.");
+            return;
         }
+        if (capabilityRequiredAndCapabilityNotSupported(peersNodeAddress, message)) {
+            sendMailboxMessageListener.onFault("We did not send the EncryptedMailboxMessage " +
+                    "because the peer does not support the capability.");
+            return;
+        }
+
+        try {
+            log.debug("\n\nEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\n" +
+                    "Encrypt message:\nmessage={}"
+                    + "\nEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\n", message);
+
+            PrefixedSealedAndSignedMessage prefixedSealedAndSignedMessage = new PrefixedSealedAndSignedMessage(
+                    networkNode.getNodeAddress(),
+                    encryptionService.encryptAndSign(peersPubKeyRing, message),
+                    peersNodeAddress.getAddressPrefixHash(),
+                    UUID.randomUUID().toString());
+            SettableFuture<Connection> future = networkNode.sendMessage(peersNodeAddress, prefixedSealedAndSignedMessage);
+            Futures.addCallback(future, new FutureCallback<Connection>() {
+                @Override
+                public void onSuccess(@Nullable Connection connection) {
+                    log.trace("SendEncryptedMailboxMessage onSuccess");
+                    sendMailboxMessageListener.onArrived();
+                }
+
+                @Override
+                public void onFailure(@NotNull Throwable throwable) {
+                    log.info("We cannot send message to peer. Peer might be offline. We will store message in mailbox. peersNodeAddress=" + peersNodeAddress);
+                    PublicKey receiverStoragePublicKey = peersPubKeyRing.getSignaturePubKey();
+                    addMailboxData(new MailboxStoragePayload(prefixedSealedAndSignedMessage,
+                                    keyRing.getSignatureKeyPair().getPublic(),
+                                    receiverStoragePublicKey),
+                            receiverStoragePublicKey,
+                            sendMailboxMessageListener);
+                }
+            });
+        } catch (CryptoException e) {
+            log.error("sendEncryptedMessage failed");
+            e.printStackTrace();
+            sendMailboxMessageListener.onFault("sendEncryptedMailboxMessage failed " + e);
+        }
+    }
+
+    private boolean capabilityRequiredAndCapabilityNotSupported(NodeAddress peersNodeAddress, NetworkEnvelope message) {
+        if (!(message instanceof CapabilityRequiringPayload))
+            return false;
+
+        // We only expect AckMessage so far
+        if (!(message instanceof AckMessage))
+            log.warn("We got a CapabilityRequiringPayload for the mailbox message which is not a AckMessage. " +
+                    "peersNodeAddress={}", peersNodeAddress);
+
+        Set<Peer> allPeers = peerManager.getPersistedPeers();
+        allPeers.addAll(peerManager.getReportedPeers());
+        allPeers.addAll(peerManager.getLivePeers(null));
+        // We might have multiple entries of the same peer without the supportedCapabilities field set if we received
+        // it from old versions, so we filter those.
+        Optional<Peer> optionalPeer = allPeers.stream()
+                .filter(peer -> peer.getNodeAddress().equals(peersNodeAddress))
+                .filter(peer -> peer.getSupportedCapabilities() != null)
+                .filter(peer -> !peer.getSupportedCapabilities().isEmpty())
+                .findAny();
+        if (optionalPeer.isPresent()) {
+            Peer peer = optionalPeer.get();
+            boolean result = Connection.isCapabilityRequired(message) &&
+                    !Connection.isCapabilitySupported((CapabilityRequiringPayload) message, peer.getSupportedCapabilities());
+
+            if (result)
+                log.warn("We don't send the message because the peer does not support the required capability. " +
+                        "peersNodeAddress={}", peersNodeAddress);
+
+            return result;
+        }
+        log.warn("We don't have the peer in our persisted peers so we don't know his capabilities. " +
+                "We decide to not sent the msg. peersNodeAddress={}", peersNodeAddress);
+        return true;
+
     }
 
 

@@ -26,6 +26,7 @@ import bisq.common.crypto.KeyRing;
 import bisq.common.crypto.PubKeyRing;
 import bisq.common.crypto.SealedAndSigned;
 import bisq.common.crypto.Sig;
+import bisq.common.proto.ProtobufferException;
 import bisq.common.proto.network.NetworkEnvelope;
 import bisq.common.proto.network.NetworkProtoResolver;
 
@@ -66,7 +67,8 @@ public class EncryptionService {
      * @return A DecryptedPayloadWithPubKey object.
      * @throws CryptoException
      */
-    public DecryptedDataTuple decryptHybridWithSignature(SealedAndSigned sealedAndSigned, PrivateKey privateKey) throws CryptoException {
+    public DecryptedDataTuple decryptHybridWithSignature(SealedAndSigned sealedAndSigned, PrivateKey privateKey) throws
+            CryptoException, ProtobufferException {
         SecretKey secretKey = decryptSecretKey(sealedAndSigned.getEncryptedSecretKey(), privateKey);
         boolean isValid = Sig.verify(sealedAndSigned.getSigPublicKey(),
                 Hash.getSha256Hash(sealedAndSigned.getEncryptedPayloadWithHmac()),
@@ -80,12 +82,12 @@ public class EncryptionService {
             NetworkEnvelope decryptedPayload = networkProtoResolver.fromProto(envelope);
             return new DecryptedDataTuple(decryptedPayload, sealedAndSigned.getSigPublicKey());
         } catch (InvalidProtocolBufferException e) {
-            throw new CryptoException("Unable to parse protobuffer message.", e);
+            throw new ProtobufferException("Unable to parse protobuffer message.", e);
         }
-
     }
 
-    public DecryptedMessageWithPubKey decryptAndVerify(SealedAndSigned sealedAndSigned) throws CryptoException {
+    public DecryptedMessageWithPubKey decryptAndVerify(SealedAndSigned sealedAndSigned) throws
+            CryptoException, ProtobufferException {
         DecryptedDataTuple decryptedDataTuple = decryptHybridWithSignature(sealedAndSigned,
                 keyRing.getEncryptionKeyPair().getPrivate());
         return new DecryptedMessageWithPubKey(decryptedDataTuple.getNetworkEnvelope(),

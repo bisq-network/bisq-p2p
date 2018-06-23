@@ -581,6 +581,8 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
                     encryptionService.encryptAndSign(peersPubKeyRing, message),
                     peersNodeAddress.getAddressPrefixHash(),
                     UUID.randomUUID().toString());
+
+            log.debug("sendEncryptedMailboxMessage msg={},  peersNodeAddress={}", message, peersNodeAddress);
             SettableFuture<Connection> future = networkNode.sendMessage(peersNodeAddress, prefixedSealedAndSignedMessage);
             Futures.addCallback(future, new FutureCallback<Connection>() {
                 @Override

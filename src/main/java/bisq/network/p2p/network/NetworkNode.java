@@ -98,7 +98,7 @@ public abstract class NetworkNode implements MessageListener {
     abstract public void start(@Nullable SetupListener setupListener);
 
     public SettableFuture<Connection> sendMessage(@NotNull NodeAddress peersNodeAddress, NetworkEnvelope networkEnvelop) {
-        Log.traceCall("peersNodeAddress=" + peersNodeAddress + "\n\tmessage=" + Utilities.toTruncatedString(networkEnvelop));
+        log.debug("sendMessage: peersNodeAddress=" + peersNodeAddress + "\n\tmessage=" + Utilities.toTruncatedString(networkEnvelop));
         checkNotNull(peersNodeAddress, "peerAddress must not be null");
 
         Connection connection = getOutboundConnection(peersNodeAddress);
@@ -206,6 +206,7 @@ public abstract class NetworkNode implements MessageListener {
                 }
 
                 public void onFailure(@NotNull Throwable throwable) {
+                    log.error("onFailure at sendMessage: peersNodeAddress=" + peersNodeAddress + "\n\tmessage=" + Utilities.toTruncatedString(networkEnvelop));
                     UserThread.execute(() -> resultFuture.setException(throwable));
                 }
             });

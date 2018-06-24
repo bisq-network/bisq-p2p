@@ -102,7 +102,6 @@ class PeerExchangeHandler implements MessageListener {
     }
 
     private void sendGetPeersRequest(NodeAddress nodeAddress) {
-        Log.traceCall("nodeAddress=" + nodeAddress + " / this=" + this);
         log.debug("sendGetPeersRequest to nodeAddress={}", nodeAddress);
         if (!stopped) {
             if (networkNode.getNodeAddress() != null) {

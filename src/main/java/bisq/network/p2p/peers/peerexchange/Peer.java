@@ -32,14 +32,12 @@ import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.Nullable;
 
 @Getter
 @EqualsAndHashCode(exclude = {"date", "failedConnectionAttempts"})
-@ToString
 @Slf4j
 public final class Peer implements NetworkPayload, PersistablePayload, SupportedCapabilitiesListener {
     private static final int MAX_FAILED_CONNECTION_ATTEMPTS = 5;
@@ -66,6 +64,9 @@ public final class Peer implements NetworkPayload, PersistablePayload, Supported
         this.nodeAddress = nodeAddress;
         this.date = date;
         this.supportedCapabilities = supportedCapabilities;
+
+        if (supportedCapabilities.isEmpty())
+            log.warn("supportedCapabilities is empty");
     }
 
     @Override
@@ -105,5 +106,16 @@ public final class Peer implements NetworkPayload, PersistablePayload, Supported
     public void onChanged(List<Integer> supportedCapabilities) {
         if (supportedCapabilities != null && !supportedCapabilities.isEmpty())
             this.supportedCapabilities = supportedCapabilities;
+    }
+
+
+    @Override
+    public String toString() {
+        return "Peer{" +
+                "\n     nodeAddress=" + nodeAddress +
+                ",\n     supportedCapabilities=" + supportedCapabilities +
+                ",\n     failedConnectionAttempts=" + failedConnectionAttempts +
+                ",\n     date=" + date +
+                "\n}";
     }
 }

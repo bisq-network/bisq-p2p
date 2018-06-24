@@ -312,7 +312,7 @@ public class PeerExchangeManager implements MessageListener, ConnectionListener,
                 log.debug("Number of peers in list for connectToMorePeers: {}", list.size());
                 log.trace("Filtered connectToMorePeers list: list=" + list);
                 if (!list.isEmpty()) {
-                    // Dont shuffle as we want the seed nodes at the last entries
+                    // Don't shuffle as we want the seed nodes at the last entries
                     NodeAddress nextCandidate = list.get(0);
                     list.remove(nextCandidate);
                     requestReportedPeers(nextCandidate, list);

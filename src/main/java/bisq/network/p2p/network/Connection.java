@@ -316,7 +316,7 @@ public class Connection implements MessageListener {
         return Capabilities.isCapabilitySupported(requiredCapabilities, supportedCapabilities);
     }
 
-
+    @Nullable
     public List<Integer> getSupportedCapabilities() {
         return sharedModel.getSupportedCapabilities();
     }
@@ -612,10 +612,7 @@ public class Connection implements MessageListener {
         public boolean reportInvalidRequest(RuleViolation ruleViolation) {
             log.warn("We got reported the ruleViolation {} at connection {}", ruleViolation, connection);
             int numRuleViolations;
-            if (ruleViolations.containsKey(ruleViolation))
-                numRuleViolations = ruleViolations.get(ruleViolation);
-            else
-                numRuleViolations = 0;
+            numRuleViolations = ruleViolations.getOrDefault(ruleViolation, 0);
 
             numRuleViolations++;
             ruleViolations.put(ruleViolation, numRuleViolations);

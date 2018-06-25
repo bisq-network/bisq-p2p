@@ -40,6 +40,7 @@ import bisq.common.UserThread;
 import bisq.common.app.Capabilities;
 import bisq.common.app.Log;
 import bisq.common.app.Version;
+import bisq.common.proto.ProtobufferException;
 import bisq.common.proto.network.NetworkEnvelope;
 import bisq.common.proto.network.NetworkProtoResolver;
 import bisq.common.util.Tuple2;
@@ -936,7 +937,7 @@ public class Connection implements MessageListener {
                         log.error(e.getMessage());
                         e.printStackTrace();
                         reportInvalidRequest(RuleViolation.INVALID_CLASS);
-                    } catch (NoClassDefFoundError e) {
+                    } catch (ProtobufferException | NoClassDefFoundError e) {
                         log.error(e.getMessage());
                         e.printStackTrace();
                         reportInvalidRequest(RuleViolation.INVALID_DATA_TYPE);

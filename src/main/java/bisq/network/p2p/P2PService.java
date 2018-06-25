@@ -403,12 +403,12 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void onMessage(NetworkEnvelope networkEnvelop, Connection connection) {
-        if (networkEnvelop instanceof PrefixedSealedAndSignedMessage) {
-            Log.traceCall("\n\t" + networkEnvelop.toString() + "\n\tconnection=" + connection);
+    public void onMessage(NetworkEnvelope networkEnvelope, Connection connection) {
+        if (networkEnvelope instanceof PrefixedSealedAndSignedMessage) {
+            Log.traceCall("\n\t" + networkEnvelope.toString() + "\n\tconnection=" + connection);
             // Seed nodes don't have set the encryptionService
             try {
-                PrefixedSealedAndSignedMessage prefixedSealedAndSignedMessage = (PrefixedSealedAndSignedMessage) networkEnvelop;
+                PrefixedSealedAndSignedMessage prefixedSealedAndSignedMessage = (PrefixedSealedAndSignedMessage) networkEnvelope;
                 if (verifyAddressPrefixHash(prefixedSealedAndSignedMessage)) {
                     // We set connectionType to that connection to avoid that is get closed when
                     // we get too many connection attempts.
@@ -430,7 +430,7 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
                     log.debug("Wrong receiverAddressMaskHash. The message is not intended for us.");
                 }
             } catch (CryptoException e) {
-                log.debug(networkEnvelop.toString());
+                log.debug(networkEnvelope.toString());
                 log.debug(e.toString());
                 log.debug("Decryption of prefixedSealedAndSignedMessage.sealedAndSigned failed. " +
                         "That is expected if the message is not intended for us.");

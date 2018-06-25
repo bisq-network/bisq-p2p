@@ -283,27 +283,27 @@ public class Connection implements MessageListener {
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public static boolean isCapabilityRequired(NetworkEnvelope networkEnvelop) {
-        if (networkEnvelop instanceof AddDataMessage) {
-            final ProtectedStoragePayload protectedStoragePayload = (((AddDataMessage) networkEnvelop).getProtectedStorageEntry()).getProtectedStoragePayload();
+    public static boolean isCapabilityRequired(NetworkEnvelope networkEnvelope) {
+        if (networkEnvelope instanceof AddDataMessage) {
+            final ProtectedStoragePayload protectedStoragePayload = (((AddDataMessage) networkEnvelope).getProtectedStorageEntry()).getProtectedStoragePayload();
             return protectedStoragePayload instanceof CapabilityRequiringPayload;
-        } else if (networkEnvelop instanceof AddPersistableNetworkPayloadMessage) {
-            final PersistableNetworkPayload persistableNetworkPayload = ((AddPersistableNetworkPayloadMessage) networkEnvelop).getPersistableNetworkPayload();
+        } else if (networkEnvelope instanceof AddPersistableNetworkPayloadMessage) {
+            final PersistableNetworkPayload persistableNetworkPayload = ((AddPersistableNetworkPayloadMessage) networkEnvelope).getPersistableNetworkPayload();
             return persistableNetworkPayload instanceof CapabilityRequiringPayload;
         } else {
-            return networkEnvelop instanceof CapabilityRequiringPayload;
+            return networkEnvelope instanceof CapabilityRequiringPayload;
         }
     }
 
-    private boolean isCapabilitySupported(NetworkEnvelope networkEnvelop) {
-        if (networkEnvelop instanceof AddDataMessage) {
-            final ProtectedStoragePayload protectedStoragePayload = (((AddDataMessage) networkEnvelop).getProtectedStorageEntry()).getProtectedStoragePayload();
+    private boolean isCapabilitySupported(NetworkEnvelope networkEnvelope) {
+        if (networkEnvelope instanceof AddDataMessage) {
+            final ProtectedStoragePayload protectedStoragePayload = (((AddDataMessage) networkEnvelope).getProtectedStorageEntry()).getProtectedStoragePayload();
             return protectedStoragePayload instanceof CapabilityRequiringPayload && isCapabilitySupported((CapabilityRequiringPayload) protectedStoragePayload);
-        } else if (networkEnvelop instanceof AddPersistableNetworkPayloadMessage) {
-            final PersistableNetworkPayload persistableNetworkPayload = ((AddPersistableNetworkPayloadMessage) networkEnvelop).getPersistableNetworkPayload();
+        } else if (networkEnvelope instanceof AddPersistableNetworkPayloadMessage) {
+            final PersistableNetworkPayload persistableNetworkPayload = ((AddPersistableNetworkPayloadMessage) networkEnvelope).getPersistableNetworkPayload();
             return persistableNetworkPayload instanceof CapabilityRequiringPayload && isCapabilitySupported((CapabilityRequiringPayload) persistableNetworkPayload);
         } else {
-            return networkEnvelop instanceof CapabilityRequiringPayload && isCapabilitySupported((CapabilityRequiringPayload) networkEnvelop);
+            return networkEnvelope instanceof CapabilityRequiringPayload && isCapabilitySupported((CapabilityRequiringPayload) networkEnvelope);
         }
     }
 
@@ -344,7 +344,7 @@ public class Connection implements MessageListener {
     }
 
     // TODO either use the argument or delete it
-    private boolean violatesThrottleLimit(NetworkEnvelope networkEnvelop) {
+    private boolean violatesThrottleLimit(NetworkEnvelope networkEnvelope) {
         long now = System.currentTimeMillis();
         boolean violated = false;
         //TODO remove message storage after network is tested stable
@@ -381,7 +381,7 @@ public class Connection implements MessageListener {
             messageTimeStamps.remove(0);
         }
 
-        messageTimeStamps.add(new Tuple2<>(now, networkEnvelop));
+        messageTimeStamps.add(new Tuple2<>(now, networkEnvelope));
         return violated;
     }
 
@@ -391,9 +391,9 @@ public class Connection implements MessageListener {
 
     // Only receive non - CloseConnectionMessage network_messages
     @Override
-    public void onMessage(NetworkEnvelope networkEnvelop, Connection connection) {
+    public void onMessage(NetworkEnvelope networkEnvelope, Connection connection) {
         checkArgument(connection.equals(this));
-        UserThread.execute(() -> messageListeners.stream().forEach(e -> e.onMessage(networkEnvelop, connection)));
+        UserThread.execute(() -> messageListeners.stream().forEach(e -> e.onMessage(networkEnvelope, connection)));
     }
 
 

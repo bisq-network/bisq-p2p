@@ -97,8 +97,8 @@ public abstract class NetworkNode implements MessageListener {
     // when the events happen.
     abstract public void start(@Nullable SetupListener setupListener);
 
-    public SettableFuture<Connection> sendMessage(@NotNull NodeAddress peersNodeAddress, NetworkEnvelope networkEnvelop) {
-        log.debug("sendMessage: peersNodeAddress=" + peersNodeAddress + "\n\tmessage=" + Utilities.toTruncatedString(networkEnvelop));
+    public SettableFuture<Connection> sendMessage(@NotNull NodeAddress peersNodeAddress, NetworkEnvelope networkEnvelope) {
+        log.debug("sendMessage: peersNodeAddress=" + peersNodeAddress + "\n\tmessage=" + Utilities.toTruncatedString(networkEnvelope));
         checkNotNull(peersNodeAddress, "peerAddress must not be null");
 
         Connection connection = getOutboundConnection(peersNodeAddress);
@@ -106,7 +106,7 @@ public abstract class NetworkNode implements MessageListener {
             connection = getInboundConnection(peersNodeAddress);
 
         if (connection != null) {
-            return sendMessage(connection, networkEnvelop);
+            return sendMessage(connection, networkEnvelope);
         } else {
             log.debug("We have not found any connection for peerAddress {}.\n\t" +
                     "We will create a new outbound connection.", peersNodeAddress);
@@ -144,7 +144,7 @@ public abstract class NetworkNode implements MessageListener {
                         } catch (Throwable throwable) {
                             log.error("Error at closing socket " + throwable);
                         }
-                        existingConnection.sendMessage(networkEnvelop);
+                        existingConnection.sendMessage(networkEnvelope);
                         return existingConnection;
                     } else {
                         final ConnectionListener connectionListener = new ConnectionListener() {
@@ -183,11 +183,11 @@ public abstract class NetworkNode implements MessageListener {
                                 + "\nmyNodeAddress=" + getNodeAddress()
                                 + "\npeersNodeAddress=" + peersNodeAddress
                                 + "\nuid=" + outboundConnection.getUid()
-                                + "\nmessage=" + networkEnvelop
+                                + "\nmessage=" + networkEnvelope
                                 + "\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n");
 
                         // can take a while when using tor
-                        outboundConnection.sendMessage(networkEnvelop);
+                        outboundConnection.sendMessage(networkEnvelope);
                         return outboundConnection;
                     }
                 } catch (Throwable throwable) {
@@ -206,7 +206,7 @@ public abstract class NetworkNode implements MessageListener {
                 }
 
                 public void onFailure(@NotNull Throwable throwable) {
-                    log.info("onFailure at sendMessage: peersNodeAddress=" + peersNodeAddress + "\n\tmessage=" + Utilities.toTruncatedString(networkEnvelop));
+                    log.info("onFailure at sendMessage: peersNodeAddress=" + peersNodeAddress + "\n\tmessage=" + Utilities.toTruncatedString(networkEnvelope));
                     UserThread.execute(() -> resultFuture.setException(throwable));
                 }
             });
@@ -257,12 +257,12 @@ public abstract class NetworkNode implements MessageListener {
     }
 
 
-    public SettableFuture<Connection> sendMessage(Connection connection, NetworkEnvelope networkEnvelop) {
-        Log.traceCall("\n\tmessage=" + Utilities.toTruncatedString(networkEnvelop) + "\n\tconnection=" + connection);
+    public SettableFuture<Connection> sendMessage(Connection connection, NetworkEnvelope networkEnvelope) {
+        Log.traceCall("\n\tmessage=" + Utilities.toTruncatedString(networkEnvelope) + "\n\tconnection=" + connection);
         // connection.sendMessage might take a bit (compression, write to stream), so we use a thread to not block
         ListenableFuture<Connection> future = executorService.submit(() -> {
             Thread.currentThread().setName("NetworkNode:SendMessage-to-" + connection.getUid());
-            connection.sendMessage(networkEnvelop);
+            connection.sendMessage(networkEnvelope);
             return connection;
         });
         final SettableFuture<Connection> resultFuture = SettableFuture.create();
@@ -338,8 +338,8 @@ public abstract class NetworkNode implements MessageListener {
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void onMessage(NetworkEnvelope networkEnvelop, Connection connection) {
-        messageListeners.stream().forEach(e -> e.onMessage(networkEnvelop, connection));
+    public void onMessage(NetworkEnvelope networkEnvelope, Connection connection) {
+        messageListeners.stream().forEach(e -> e.onMessage(networkEnvelope, connection));
     }
 
 

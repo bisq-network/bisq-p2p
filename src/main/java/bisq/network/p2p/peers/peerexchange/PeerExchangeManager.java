@@ -196,9 +196,9 @@ public class PeerExchangeManager implements MessageListener, ConnectionListener,
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void onMessage(NetworkEnvelope networkEnvelop, Connection connection) {
-        if (networkEnvelop instanceof GetPeersRequest) {
-            Log.traceCall(networkEnvelop.toString() + "\n\tconnection=" + connection);
+    public void onMessage(NetworkEnvelope networkEnvelope, Connection connection) {
+        if (networkEnvelope instanceof GetPeersRequest) {
+            Log.traceCall(networkEnvelope.toString() + "\n\tconnection=" + connection);
             if (!stopped) {
                 if (peerManager.isSeedNode(connection))
                     connection.setPeerType(Connection.PeerType.SEED_NODE);
@@ -218,7 +218,7 @@ public class PeerExchangeManager implements MessageListener, ConnectionListener,
                                 peerManager.handleConnectionFault(connection);
                             }
                         });
-                getPeersRequestHandler.handle((GetPeersRequest) networkEnvelop, connection);
+                getPeersRequestHandler.handle((GetPeersRequest) networkEnvelope, connection);
             } else {
                 log.warn("We have stopped already. We ignore that onMessage call.");
             }

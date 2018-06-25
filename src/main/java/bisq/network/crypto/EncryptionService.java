@@ -56,8 +56,8 @@ public class EncryptionService {
         this.networkProtoResolver = networkProtoResolver;
     }
 
-    public SealedAndSigned encryptAndSign(PubKeyRing pubKeyRing, NetworkEnvelope networkEnvelop) throws CryptoException {
-        return encryptHybridWithSignature(networkEnvelop, keyRing.getSignatureKeyPair(), pubKeyRing.getEncryptionPubKey());
+    public SealedAndSigned encryptAndSign(PubKeyRing pubKeyRing, NetworkEnvelope networkEnvelope) throws CryptoException {
+        return encryptHybridWithSignature(networkEnvelope, keyRing.getSignatureKeyPair(), pubKeyRing.getEncryptionPubKey());
     }
 
     /**
@@ -92,8 +92,8 @@ public class EncryptionService {
                 decryptedDataTuple.getSigPublicKey());
     }
 
-    private static byte[] encryptPayloadWithHmac(NetworkEnvelope networkEnvelop, SecretKey secretKey) throws CryptoException {
-        return Encryption.encryptPayloadWithHmac(networkEnvelop.toProtoNetworkEnvelope().toByteArray(), secretKey);
+    private static byte[] encryptPayloadWithHmac(NetworkEnvelope networkEnvelope, SecretKey secretKey) throws CryptoException {
+        return Encryption.encryptPayloadWithHmac(networkEnvelope.toProtoNetworkEnvelope().toByteArray(), secretKey);
     }
 
     /**

@@ -471,7 +471,8 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
 
     private void doSendEncryptedDirectMessage(@NotNull NodeAddress peersNodeAddress, PubKeyRing pubKeyRing, NetworkEnvelope message,
                                               SendDirectMessageListener sendDirectMessageListener) {
-        log.debug("doSendEncryptedDirectMessage peersNodeAddress={}, message={}", peersNodeAddress, message.getClass().getSimpleName());
+        log.info("Send encrypted direct message {} to peer {}",
+                message.getClass().getSimpleName(), peersNodeAddress);
         checkNotNull(peersNodeAddress, "Peer node address must not be null at doSendEncryptedDirectMessage");
         checkNotNull(networkNode.getNodeAddress(), "My node address must not be null at doSendEncryptedDirectMessage");
         try {
@@ -487,11 +488,15 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
             Futures.addCallback(future, new FutureCallback<Connection>() {
                 @Override
                 public void onSuccess(@Nullable Connection connection) {
+                    log.info("Encrypted direct message arrived at peer: Message {}; peer {}",
+                            message.getClass().getSimpleName(), peersNodeAddress);
                     sendDirectMessageListener.onArrived();
                 }
 
                 @Override
                 public void onFailure(@NotNull Throwable throwable) {
+                    log.warn("Sending encrypted direct message failed: Message {}; peer {}; error={}",
+                            message.getClass().getSimpleName(), peersNodeAddress, throwable.toString());
                     log.error(throwable.toString());
                     throwable.printStackTrace();
                     sendDirectMessageListener.onFault(throwable.toString());
@@ -550,6 +555,9 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
     public void sendEncryptedMailboxMessage(NodeAddress peersNodeAddress, PubKeyRing peersPubKeyRing,
                                             NetworkEnvelope message,
                                             SendMailboxMessageListener sendMailboxMessageListener) {
+        log.info("Send encrypted mailbox message {} to peer {}",
+                message.getClass().getSimpleName(), peersNodeAddress);
+
         checkNotNull(peersNodeAddress,
                 "PeerAddress must not be null (sendEncryptedMailboxMessage)");
         checkNotNull(networkNode.getNodeAddress(),
@@ -587,13 +595,15 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
             Futures.addCallback(future, new FutureCallback<Connection>() {
                 @Override
                 public void onSuccess(@Nullable Connection connection) {
-                    log.trace("SendEncryptedMailboxMessage onSuccess");
+                    log.info("Encrypted mailbox message arrived at peer: Message {}; peer {}",
+                            message.getClass().getSimpleName(), peersNodeAddress);
                     sendMailboxMessageListener.onArrived();
                 }
 
                 @Override
                 public void onFailure(@NotNull Throwable throwable) {
-                    log.info("We cannot send message to peer. Peer might be offline. We will store message in mailbox. peersNodeAddress=" + peersNodeAddress);
+                    log.info("Encrypted mailbox message stored in mailbox: Message {}; peer {}",
+                            message.getClass().getSimpleName(), peersNodeAddress);
                     PublicKey receiverStoragePublicKey = peersPubKeyRing.getSignaturePubKey();
                     addMailboxData(new MailboxStoragePayload(prefixedSealedAndSignedMessage,
                                     keyRing.getSignatureKeyPair().getPublic(),

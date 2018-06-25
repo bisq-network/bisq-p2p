@@ -66,7 +66,7 @@ public final class Peer implements NetworkPayload, PersistablePayload, Supported
         this.supportedCapabilities = supportedCapabilities;
 
         if (supportedCapabilities.isEmpty())
-            log.warn("supportedCapabilities is empty");
+            log.warn("SupportedCapabilities is empty. nodeAddress={}", nodeAddress);
     }
 
     @Override

@@ -295,19 +295,19 @@ public class Connection implements MessageListener {
         }
     }
 
-    public boolean isCapabilitySupported(NetworkEnvelope networkEnvelop) {
+    private boolean isCapabilitySupported(NetworkEnvelope networkEnvelop) {
         if (networkEnvelop instanceof AddDataMessage) {
             final ProtectedStoragePayload protectedStoragePayload = (((AddDataMessage) networkEnvelop).getProtectedStorageEntry()).getProtectedStoragePayload();
-            return isCapabilitySupported((CapabilityRequiringPayload) protectedStoragePayload);
+            return protectedStoragePayload instanceof CapabilityRequiringPayload && isCapabilitySupported((CapabilityRequiringPayload) protectedStoragePayload);
         } else if (networkEnvelop instanceof AddPersistableNetworkPayloadMessage) {
             final PersistableNetworkPayload persistableNetworkPayload = ((AddPersistableNetworkPayloadMessage) networkEnvelop).getPersistableNetworkPayload();
-            return isCapabilitySupported((CapabilityRequiringPayload) persistableNetworkPayload);
+            return persistableNetworkPayload instanceof CapabilityRequiringPayload && isCapabilitySupported((CapabilityRequiringPayload) persistableNetworkPayload);
         } else {
-            return isCapabilitySupported((CapabilityRequiringPayload) networkEnvelop);
+            return networkEnvelop instanceof CapabilityRequiringPayload && isCapabilitySupported((CapabilityRequiringPayload) networkEnvelop);
         }
     }
 
-    public boolean isCapabilitySupported(CapabilityRequiringPayload payload) {
+    private boolean isCapabilitySupported(CapabilityRequiringPayload payload) {
         return isCapabilitySupported(payload, sharedModel.getSupportedCapabilities());
     }
 

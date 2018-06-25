@@ -37,25 +37,38 @@ import java.util.concurrent.TimeUnit;
 
 import lombok.EqualsAndHashCode;
 import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.Nullable;
 
 // We exclude uid from hashcode and equals to detect duplicate entries of the same AckMessage
 @EqualsAndHashCode(callSuper = true, exclude = {"uid"})
 @Value
+@Slf4j
 public final class AckMessage extends NetworkEnvelope implements MailboxMessage, PersistablePayload,
         ExpirablePayload, CapabilityRequiringPayload {
 
     private final String uid;
     private final NodeAddress senderNodeAddress;
-    private final AckMessageSourceType sourceType;       //e.g. TradeMessage, DisputeMessage,...
+    private final AckMessageSourceType sourceType;
     private final String sourceMsgClassName;
-    private final String sourceUid;     // uid of source (TradeMessage)
-    private final String sourceId;      // id of source (tradeId, disputeId)
-    private final boolean success;       // true if source message was processed successfully
     @Nullable
-    private final String errorMessage;  // optional error message if source message processing failed
+    private final String sourceUid;
+    private final String sourceId;
+    private final boolean success;
+    @Nullable
+    private final String errorMessage;
 
+    /**
+     *
+     * @param senderNodeAddress       Address of sender
+     * @param sourceType            Type of source e.g. TradeMessage, DisputeMessage,...
+     * @param sourceMsgClassName    Class name of source msg
+     * @param sourceUid             Optional Uid of source (TradeMessage). Can be null if we receive trades/offers from old clients
+     * @param sourceId              Id of source (tradeId, disputeId)
+     * @param success               True if source message was processed successfully
+     * @param errorMessage          Optional error message if source message processing failed
+     */
     public AckMessage(NodeAddress senderNodeAddress,
                       AckMessageSourceType sourceType,
                       String sourceMsgClassName,
@@ -83,7 +96,7 @@ public final class AckMessage extends NetworkEnvelope implements MailboxMessage,
                        NodeAddress senderNodeAddress,
                        AckMessageSourceType sourceType,
                        String sourceMsgClassName,
-                       String sourceUid,
+                       @Nullable String sourceUid,
                        String sourceId,
                        boolean success,
                        @Nullable String errorMessage,
@@ -100,30 +113,25 @@ public final class AckMessage extends NetworkEnvelope implements MailboxMessage,
     }
 
     public PB.AckMessage toProtoMessage() {
-        PB.AckMessage.Builder builder = PB.AckMessage.newBuilder()
-                .setUid(uid)
-                .setSenderNodeAddress(senderNodeAddress.toProtoMessage())
-                .setSourceType(sourceType.name())
-                .setSourceMsgClassName(sourceMsgClassName)
-                .setSourceUid(sourceUid)
-                .setSourceId(sourceId)
-                .setSuccess(success);
-        Optional.ofNullable(errorMessage).ifPresent(builder::setErrorMessage);
-        return builder.build();
+        return getBuilder().build();
     }
 
     @Override
     public PB.NetworkEnvelope toProtoNetworkEnvelope() {
+        return getNetworkEnvelopeBuilder().setAckMessage(getBuilder()).build();
+    }
+
+    public PB.AckMessage.Builder getBuilder() {
         PB.AckMessage.Builder builder = PB.AckMessage.newBuilder()
                 .setUid(uid)
                 .setSenderNodeAddress(senderNodeAddress.toProtoMessage())
                 .setSourceType(sourceType.name())
                 .setSourceMsgClassName(sourceMsgClassName)
-                .setSourceUid(sourceUid)
                 .setSourceId(sourceId)
                 .setSuccess(success);
+        Optional.ofNullable(sourceUid).ifPresent(builder::setSourceUid);
         Optional.ofNullable(errorMessage).ifPresent(builder::setErrorMessage);
-        return getNetworkEnvelopeBuilder().setAckMessage(builder).build();
+        return builder;
     }
 
     public static AckMessage fromProto(PB.AckMessage proto, int messageVersion) {
@@ -132,7 +140,7 @@ public final class AckMessage extends NetworkEnvelope implements MailboxMessage,
                 NodeAddress.fromProto(proto.getSenderNodeAddress()),
                 sourceType,
                 proto.getSourceMsgClassName(),
-                proto.getSourceUid(),
+                proto.getSourceUid().isEmpty() ? null : proto.getSourceUid(),
                 proto.getSourceId(),
                 proto.getSuccess(),
                 proto.getErrorMessage().isEmpty() ? null : proto.getErrorMessage(),

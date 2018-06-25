@@ -471,10 +471,19 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
 
     private void doSendEncryptedDirectMessage(@NotNull NodeAddress peersNodeAddress, PubKeyRing pubKeyRing, NetworkEnvelope message,
                                               SendDirectMessageListener sendDirectMessageListener) {
-        log.info("Send encrypted direct message {} to peer {}",
+        log.debug("Send encrypted direct message {} to peer {}",
                 message.getClass().getSimpleName(), peersNodeAddress);
+
         checkNotNull(peersNodeAddress, "Peer node address must not be null at doSendEncryptedDirectMessage");
+
         checkNotNull(networkNode.getNodeAddress(), "My node address must not be null at doSendEncryptedDirectMessage");
+
+        if (capabilityRequiredAndCapabilityNotSupported(peersNodeAddress, message)) {
+            sendDirectMessageListener.onFault("We did not send the EncryptedMessage " +
+                    "because the peer does not support the capability.");
+            return;
+        }
+
         try {
             log.debug("\n\nEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\n" +
                     "Encrypt message:\nmessage={}"
@@ -488,15 +497,11 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
             Futures.addCallback(future, new FutureCallback<Connection>() {
                 @Override
                 public void onSuccess(@Nullable Connection connection) {
-                    log.info("Encrypted direct message arrived at peer: Message {}; peer {}",
-                            message.getClass().getSimpleName(), peersNodeAddress);
                     sendDirectMessageListener.onArrived();
                 }
 
                 @Override
                 public void onFailure(@NotNull Throwable throwable) {
-                    log.warn("Sending encrypted direct message failed: Message {}; peer {}; error={}",
-                            message.getClass().getSimpleName(), peersNodeAddress, throwable.toString());
                     log.error(throwable.toString());
                     throwable.printStackTrace();
                     sendDirectMessageListener.onFault(throwable.toString());
@@ -555,9 +560,6 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
     public void sendEncryptedMailboxMessage(NodeAddress peersNodeAddress, PubKeyRing peersPubKeyRing,
                                             NetworkEnvelope message,
                                             SendMailboxMessageListener sendMailboxMessageListener) {
-        log.info("Send encrypted mailbox message {} to peer {}",
-                message.getClass().getSimpleName(), peersNodeAddress);
-
         checkNotNull(peersNodeAddress,
                 "PeerAddress must not be null (sendEncryptedMailboxMessage)");
         checkNotNull(networkNode.getNodeAddress(),
@@ -573,6 +575,7 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
                     "Please check your internet connection.");
             return;
         }
+
         if (capabilityRequiredAndCapabilityNotSupported(peersNodeAddress, message)) {
             sendMailboxMessageListener.onFault("We did not send the EncryptedMailboxMessage " +
                     "because the peer does not support the capability.");
@@ -595,15 +598,11 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
             Futures.addCallback(future, new FutureCallback<Connection>() {
                 @Override
                 public void onSuccess(@Nullable Connection connection) {
-                    log.info("Encrypted mailbox message arrived at peer: Message {}; peer {}",
-                            message.getClass().getSimpleName(), peersNodeAddress);
                     sendMailboxMessageListener.onArrived();
                 }
 
                 @Override
                 public void onFailure(@NotNull Throwable throwable) {
-                    log.info("Encrypted mailbox message stored in mailbox: Message {}; peer {}",
-                            message.getClass().getSimpleName(), peersNodeAddress);
                     PublicKey receiverStoragePublicKey = peersPubKeyRing.getSignaturePubKey();
                     addMailboxData(new MailboxStoragePayload(prefixedSealedAndSignedMessage,
                                     keyRing.getSignatureKeyPair().getPublic(),

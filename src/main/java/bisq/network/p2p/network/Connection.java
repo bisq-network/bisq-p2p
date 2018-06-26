@@ -40,6 +40,7 @@ import bisq.common.UserThread;
 import bisq.common.app.Capabilities;
 import bisq.common.app.Log;
 import bisq.common.app.Version;
+import bisq.common.proto.ProtobufferException;
 import bisq.common.proto.network.NetworkEnvelope;
 import bisq.common.proto.network.NetworkProtoResolver;
 import bisq.common.util.Tuple2;
@@ -268,7 +269,7 @@ public class Connection implements MessageListener {
                     handleException(t);
                 }
             } else {
-                log.debug("We did not send the message because the peer does not support our required capabilities. message={}, peers supportedCapabilities={}", networkEnvelope, sharedModel.getSupportedCapabilities());
+                log.info("We did not send the message because the peer does not support our required capabilities. message={}, peers supportedCapabilities={}", networkEnvelope, sharedModel.getSupportedCapabilities());
             }
         } else {
             log.debug("called sendMessage but was already stopped");
@@ -283,11 +284,11 @@ public class Connection implements MessageListener {
             final PersistableNetworkPayload persistableNetworkPayload = ((AddPersistableNetworkPayloadMessage) networkEnvelop).getPersistableNetworkPayload();
             return !(persistableNetworkPayload instanceof CapabilityRequiringPayload) || isCapabilitySupported((CapabilityRequiringPayload) persistableNetworkPayload);
         } else {
-            return true;
+            return !(networkEnvelop instanceof CapabilityRequiringPayload) || isCapabilitySupported((CapabilityRequiringPayload) networkEnvelop);
         }
     }
 
-    public boolean isCapabilitySupported(CapabilityRequiringPayload payload) {
+    private boolean isCapabilitySupported(CapabilityRequiringPayload payload) {
         final List<Integer> requiredCapabilities = payload.getRequiredCapabilities();
         final List<Integer> supportedCapabilities = sharedModel.getSupportedCapabilities();
         return Capabilities.isCapabilitySupported(requiredCapabilities, supportedCapabilities);
@@ -295,10 +296,14 @@ public class Connection implements MessageListener {
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isCapabilityRequired(NetworkEnvelope networkEnvelop) {
-        return (networkEnvelop instanceof AddDataMessage &&
-                (((AddDataMessage) networkEnvelop).getProtectedStorageEntry()).getProtectedStoragePayload() instanceof CapabilityRequiringPayload) ||
-                (networkEnvelop instanceof AddPersistableNetworkPayloadMessage &&
-                        (((AddPersistableNetworkPayloadMessage) networkEnvelop).getPersistableNetworkPayload() instanceof CapabilityRequiringPayload));
+        boolean isCapabilityRequiringAddDataMessage = networkEnvelop instanceof AddDataMessage &&
+                (((AddDataMessage) networkEnvelop).getProtectedStorageEntry()).getProtectedStoragePayload() instanceof CapabilityRequiringPayload;
+        boolean isCapabilityRequiringAddPersistableNetworkPayloadMessage = networkEnvelop instanceof AddPersistableNetworkPayloadMessage &&
+                (((AddPersistableNetworkPayloadMessage) networkEnvelop).getPersistableNetworkPayload() instanceof CapabilityRequiringPayload);
+        boolean isCapabilityRequiringNetworkEnvelope = networkEnvelop instanceof CapabilityRequiringPayload;
+        return isCapabilityRequiringAddDataMessage ||
+                isCapabilityRequiringAddPersistableNetworkPayloadMessage ||
+                isCapabilityRequiringNetworkEnvelope;
     }
 
     public List<Integer> getSupportedCapabilities() {
@@ -914,7 +919,7 @@ public class Connection implements MessageListener {
                         log.error(e.getMessage());
                         e.printStackTrace();
                         reportInvalidRequest(RuleViolation.INVALID_CLASS);
-                    } catch (NoClassDefFoundError e) {
+                    } catch (ProtobufferException | NoClassDefFoundError e) {
                         log.error(e.getMessage());
                         e.printStackTrace();
                         reportInvalidRequest(RuleViolation.INVALID_DATA_TYPE);

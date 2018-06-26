@@ -49,6 +49,7 @@ import bisq.common.app.Log;
 import bisq.common.crypto.CryptoException;
 import bisq.common.crypto.KeyRing;
 import bisq.common.crypto.PubKeyRing;
+import bisq.common.proto.ProtobufferException;
 import bisq.common.proto.network.NetworkEnvelope;
 import bisq.common.proto.persistable.PersistedDataHost;
 import bisq.common.util.Utilities;
@@ -420,7 +421,7 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
                             "Decrypted SealedAndSignedMessage:\ndecryptedMsgWithPubKey={}"
                             + "\nDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD\n", decryptedMessageWithPubKey);
                     if (connection.getPeersNodeAddressOptional().isPresent())
-                        decryptedDirectMessageListeners.stream().forEach(
+                        decryptedDirectMessageListeners.forEach(
                                 e -> e.onDirectMessage(decryptedMessageWithPubKey, connection.getPeersNodeAddressOptional().get()));
                     else
                         log.error("peersNodeAddress is not available at onMessage.");
@@ -432,6 +433,8 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
                 log.debug(e.toString());
                 log.debug("Decryption of prefixedSealedAndSignedMessage.sealedAndSigned failed. " +
                         "That is expected if the message is not intended for us.");
+            } catch (ProtobufferException e) {
+                log.error("Protobuffer data could not be processed: {}", e.toString());
             }
         }
     }
@@ -528,7 +531,7 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
                         mailboxMap.put(mailboxMessage.getUid(), protectedMailboxStorageEntry);
                         log.trace("Decryption of SealedAndSignedMessage succeeded. senderAddress="
                                 + senderNodeAddress + " / my address=" + getAddress());
-                        decryptedMailboxListeners.stream().forEach(
+                        decryptedMailboxListeners.forEach(
                                 e -> e.onMailboxMessageAdded(decryptedMessageWithPubKey, senderNodeAddress));
                     } else {
                         log.warn("tryDecryptMailboxData: Expected MailboxMessage but got other type. " +
@@ -538,6 +541,8 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
                     log.debug(e.toString());
                     log.debug("Decryption of prefixedSealedAndSignedMessage.sealedAndSigned failed. " +
                             "That is expected if the message is not intended for us.");
+                } catch (ProtobufferException e) {
+                    log.error("Protobuffer data could not be processed: {}", e.toString());
                 }
             } else {
                 log.debug("Wrong blurredAddressHash. The message is not intended for us.");

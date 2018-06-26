@@ -143,8 +143,7 @@ public class GetDataRequestHandler {
         return dataStorage.getPersistableNetworkPayloadList().getMap().entrySet().stream()
                 .filter(e -> !excludedKeysAsByteArray.contains(e.getKey()))
                 .map(Map.Entry::getValue)
-                .filter(payload -> (!(payload instanceof CapabilityRequiringPayload) ||
-                        connection.isCapabilitySupported(getDataRequest)))
+                .filter(payload -> (connection.noCapabilityRequiredOrCapabilityIsSupported(getDataRequest)))
                 .filter(payload -> tempLookupSet.add(new P2PDataStorage.ByteArray(payload.getHash())))
                 .collect(Collectors.toSet());
     }

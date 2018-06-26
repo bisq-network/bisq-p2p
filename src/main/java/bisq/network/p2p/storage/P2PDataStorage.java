@@ -269,20 +269,20 @@ public class P2PDataStorage implements MessageListener, ConnectionListener, Pers
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void onMessage(NetworkEnvelope networkEnvelop, Connection connection) {
-        if (networkEnvelop instanceof BroadcastMessage) {
-            Log.traceCall(Utilities.toTruncatedString(networkEnvelop) + "\n\tconnection=" + connection);
+    public void onMessage(NetworkEnvelope networkEnvelope, Connection connection) {
+        if (networkEnvelope instanceof BroadcastMessage) {
+            Log.traceCall(Utilities.toTruncatedString(networkEnvelope) + "\n\tconnection=" + connection);
             connection.getPeersNodeAddressOptional().ifPresent(peersNodeAddress -> {
-                if (networkEnvelop instanceof AddDataMessage) {
-                    addProtectedStorageEntry(((AddDataMessage) networkEnvelop).getProtectedStorageEntry(), peersNodeAddress, null, false);
-                } else if (networkEnvelop instanceof RemoveDataMessage) {
-                    remove(((RemoveDataMessage) networkEnvelop).getProtectedStorageEntry(), peersNodeAddress, false);
-                } else if (networkEnvelop instanceof RemoveMailboxDataMessage) {
-                    removeMailboxData(((RemoveMailboxDataMessage) networkEnvelop).getProtectedMailboxStorageEntry(), peersNodeAddress, false);
-                } else if (networkEnvelop instanceof RefreshOfferMessage) {
-                    refreshTTL((RefreshOfferMessage) networkEnvelop, peersNodeAddress, false);
-                } else if (networkEnvelop instanceof AddPersistableNetworkPayloadMessage) {
-                    addPersistableNetworkPayload(((AddPersistableNetworkPayloadMessage) networkEnvelop).getPersistableNetworkPayload(),
+                if (networkEnvelope instanceof AddDataMessage) {
+                    addProtectedStorageEntry(((AddDataMessage) networkEnvelope).getProtectedStorageEntry(), peersNodeAddress, null, false);
+                } else if (networkEnvelope instanceof RemoveDataMessage) {
+                    remove(((RemoveDataMessage) networkEnvelope).getProtectedStorageEntry(), peersNodeAddress, false);
+                } else if (networkEnvelope instanceof RemoveMailboxDataMessage) {
+                    removeMailboxData(((RemoveMailboxDataMessage) networkEnvelope).getProtectedMailboxStorageEntry(), peersNodeAddress, false);
+                } else if (networkEnvelope instanceof RefreshOfferMessage) {
+                    refreshTTL((RefreshOfferMessage) networkEnvelope, peersNodeAddress, false);
+                } else if (networkEnvelope instanceof AddPersistableNetworkPayloadMessage) {
+                    addPersistableNetworkPayload(((AddPersistableNetworkPayloadMessage) networkEnvelope).getPersistableNetworkPayload(),
                             peersNodeAddress, false, true, false, true);
                 }
             });

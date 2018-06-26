@@ -17,7 +17,9 @@
 
 package bisq.network.p2p;
 
-
-public interface MailboxMessage extends DirectMessage, UidMessage {
-    NodeAddress getSenderNodeAddress();
+public enum AckMessageSourceType {
+    UNDEFINED,
+    OFFER_MESSAGE,
+    TRADE_MESSAGE,
+    DISPUTE_MESSAGE
 }

@@ -15,9 +15,10 @@
  * along with Bisq. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package bisq.network.p2p;
+package bisq.network.p2p.network;
 
+import java.util.List;
 
-public interface MailboxMessage extends DirectMessage, UidMessage {
-    NodeAddress getSenderNodeAddress();
+public interface SupportedCapabilitiesListener {
+    void onChanged(List<Integer> supportedCapabilities);
 }

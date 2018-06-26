@@ -196,9 +196,9 @@ public class PeerExchangeManager implements MessageListener, ConnectionListener,
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void onMessage(NetworkEnvelope networkEnvelop, Connection connection) {
-        if (networkEnvelop instanceof GetPeersRequest) {
-            Log.traceCall(networkEnvelop.toString() + "\n\tconnection=" + connection);
+    public void onMessage(NetworkEnvelope networkEnvelope, Connection connection) {
+        if (networkEnvelope instanceof GetPeersRequest) {
+            Log.traceCall(networkEnvelope.toString() + "\n\tconnection=" + connection);
             if (!stopped) {
                 if (peerManager.isSeedNode(connection))
                     connection.setPeerType(Connection.PeerType.SEED_NODE);
@@ -218,7 +218,7 @@ public class PeerExchangeManager implements MessageListener, ConnectionListener,
                                 peerManager.handleConnectionFault(connection);
                             }
                         });
-                getPeersRequestHandler.handle((GetPeersRequest) networkEnvelop, connection);
+                getPeersRequestHandler.handle((GetPeersRequest) networkEnvelope, connection);
             } else {
                 log.warn("We have stopped already. We ignore that onMessage call.");
             }
@@ -312,7 +312,7 @@ public class PeerExchangeManager implements MessageListener, ConnectionListener,
                 log.debug("Number of peers in list for connectToMorePeers: {}", list.size());
                 log.trace("Filtered connectToMorePeers list: list=" + list);
                 if (!list.isEmpty()) {
-                    // Dont shuffle as we want the seed nodes at the last entries
+                    // Don't shuffle as we want the seed nodes at the last entries
                     NodeAddress nextCandidate = list.get(0);
                     list.remove(nextCandidate);
                     requestReportedPeers(nextCandidate, list);

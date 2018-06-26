@@ -144,11 +144,11 @@ class KeepAliveHandler implements MessageListener {
     ///////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void onMessage(NetworkEnvelope networkEnvelop, Connection connection) {
-        if (networkEnvelop instanceof Pong) {
-            Log.traceCall(networkEnvelop.toString() + "\n\tconnection=" + connection);
+    public void onMessage(NetworkEnvelope networkEnvelope, Connection connection) {
+        if (networkEnvelope instanceof Pong) {
+            Log.traceCall(networkEnvelope.toString() + "\n\tconnection=" + connection);
             if (!stopped) {
-                Pong pong = (Pong) networkEnvelop;
+                Pong pong = (Pong) networkEnvelope;
                 if (pong.getRequestNonce() == nonce) {
                     int roundTripTime = (int) (System.currentTimeMillis() - sendTs);
                     log.trace("roundTripTime=" + roundTripTime + "\n\tconnection=" + connection);

@@ -81,12 +81,14 @@ public final class GetPeersResponse extends NetworkEnvelope implements PeerExcha
     }
 
     public static GetPeersResponse fromProto(PB.GetPeersResponse proto, int messageVersion) {
-        HashSet<Peer> reportedPeers = new HashSet<>(
-                proto.getReportedPeersList()
-                        .stream()
-                        .map(peer -> new Peer(new NodeAddress(peer.getNodeAddress().getHostName(),
-                                peer.getNodeAddress().getPort())))
-                        .collect(Collectors.toList()));
+        HashSet<Peer> reportedPeers = proto.getReportedPeersList()
+                .stream()
+                .map(peer -> {
+                    NodeAddress nodeAddress = new NodeAddress(peer.getNodeAddress().getHostName(),
+                            peer.getNodeAddress().getPort());
+                    return new Peer(nodeAddress, peer.getSupportedCapabilitiesList());
+                })
+                .collect(Collectors.toCollection(HashSet::new));
         return new GetPeersResponse(proto.getRequestNonce(),
                 reportedPeers,
                 proto.getSupportedCapabilitiesList().isEmpty() ? null : proto.getSupportedCapabilitiesList(),

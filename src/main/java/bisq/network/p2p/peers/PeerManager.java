@@ -660,7 +660,25 @@ public class PeerManager implements ConnectionListener, PersistedDataHost {
         // networkNode.getConfirmedConnections includes:
         // filter(connection -> connection.getPeersNodeAddressOptional().isPresent())
         return networkNode.getConfirmedConnections().stream()
-                .map(c -> new Peer(c.getPeersNodeAddressOptional().get()))
+                .map((Connection connection) -> {
+                    List<Integer> supportedCapabilities = connection.getSupportedCapabilities();
+                    // If we have a new connection the supportedCapabilities is empty.
+                    // We lookup if we have already stored the supportedCapabilities at the persisted or reported peers
+                    // and if so we use that.
+                    if (supportedCapabilities == null || supportedCapabilities.isEmpty()) {
+                        Set<Peer> allPeers = new HashSet<>(getPersistedPeers());
+                        allPeers.addAll(getReportedPeers());
+                        supportedCapabilities = allPeers.stream().filter(peer -> peer.getNodeAddress().equals(connection.getPeersNodeAddressOptional().get()))
+                                .filter(peer -> !peer.getSupportedCapabilities().isEmpty())
+                                .findAny()
+                                .map(Peer::getSupportedCapabilities)
+                                .filter(list -> !list.isEmpty())
+                                .orElse(new ArrayList<>());
+                    }
+                    Peer peer = new Peer(connection.getPeersNodeAddressOptional().get(), supportedCapabilities);
+                    connection.addSupportedCapabilitiesListenerAsWeakReference(peer);
+                    return peer;
+                })
                 .collect(Collectors.toSet());
     }
 

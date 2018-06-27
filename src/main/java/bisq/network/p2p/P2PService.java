@@ -655,7 +655,7 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
         }
 
         log.warn("We don't have the peer in our persisted peers so we don't know his capabilities. " +
-                "We decide to not sent the msg. peersNodeAddress={}, allPeers={}", peersNodeAddress, allPeers);
+                "We decide to not sent the msg. peersNodeAddress={}", peersNodeAddress);
         return true;
 
     }

@@ -151,7 +151,7 @@ public class Connection implements MessageListener {
     private final List<Tuple2<Long, NetworkEnvelope>> messageTimeStamps = new ArrayList<>();
     private final CopyOnWriteArraySet<MessageListener> messageListeners = new CopyOnWriteArraySet<>();
     private volatile long lastSendTimeStamp = 0;
-    private final CopyOnWriteArraySet<WeakReference<SupportedCapabilitiesListener>> supportedCapabilitiesListeners = new CopyOnWriteArraySet<>();
+    private final CopyOnWriteArraySet<WeakReference<SupportedCapabilitiesListener>> capabilitiesListeners = new CopyOnWriteArraySet<>();
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -335,8 +335,8 @@ public class Connection implements MessageListener {
                     "That might happen because of async behaviour of CopyOnWriteArraySet");
     }
 
-    public void addSupportedCapabilitiesListenerAsWeakReference(SupportedCapabilitiesListener listener) {
-        supportedCapabilitiesListeners.add(new WeakReference<>(listener));
+    public void addWeakRCapabilitiesListener(SupportedCapabilitiesListener listener) {
+        capabilitiesListeners.add(new WeakReference<>(listener));
     }
 
     @SuppressWarnings({"unused", "UnusedReturnValue"})
@@ -650,7 +650,7 @@ public class Connection implements MessageListener {
         @SuppressWarnings("NullableProblems")
         public void setSupportedCapabilities(List<Integer> supportedCapabilities) {
             this.supportedCapabilities = supportedCapabilities;
-            connection.supportedCapabilitiesListeners.forEach(l -> {
+            connection.capabilitiesListeners.forEach(l -> {
                 SupportedCapabilitiesListener supportedCapabilitiesListener = l.get();
                 if (supportedCapabilitiesListener != null)
                     supportedCapabilitiesListener.onChanged(supportedCapabilities);

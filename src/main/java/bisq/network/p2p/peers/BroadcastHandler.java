@@ -168,7 +168,7 @@ public class BroadcastHandler implements PeerManager.Listener {
                 "message = " + Utilities.toTruncatedString(message);
         if (!stopped) {
             if (!connection.isStopped()) {
-                if (!connection.isCapabilityRequired(message) || connection.isCapabilitySupported(message)) {
+                if (connection.noCapabilityRequiredOrCapabilityIsSupported(message)) {
                     NodeAddress nodeAddress = connection.getPeersNodeAddressOptional().get();
                     log.trace("Broadcast message to " + nodeAddress + ".");
                     SettableFuture<Connection> future = networkNode.sendMessage(connection, message);

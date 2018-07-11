@@ -140,7 +140,7 @@ public class GetDataRequestHandler {
         final Set<P2PDataStorage.ByteArray> tempLookupSet = new HashSet<>();
         Set<P2PDataStorage.ByteArray> excludedKeysAsByteArray = P2PDataStorage.ByteArray.convertBytesSetToByteArraySet(getDataRequest.getExcludedKeys());
 
-        return dataStorage.getPersistableNetworkPayloadList().getMap().entrySet().stream()
+        return dataStorage.getAppendOnlyDataStoreMap().entrySet().stream()
                 .filter(e -> !excludedKeysAsByteArray.contains(e.getKey()))
                 .map(Map.Entry::getValue)
                 .filter(payload -> (connection.noCapabilityRequiredOrCapabilityIsSupported(getDataRequest)))

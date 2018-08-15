@@ -36,6 +36,7 @@ import bisq.network.p2p.storage.payload.CapabilityRequiringPayload;
 import bisq.network.p2p.storage.payload.PersistableNetworkPayload;
 import bisq.network.p2p.storage.payload.ProtectedStoragePayload;
 
+import bisq.common.Proto;
 import bisq.common.UserThread;
 import bisq.common.app.Capabilities;
 import bisq.common.app.Log;
@@ -279,32 +280,32 @@ public class Connection implements MessageListener {
         }
     }
 
-    public boolean noCapabilityRequiredOrCapabilityIsSupported(NetworkEnvelope networkEnvelope) {
-        return !isCapabilityRequired(networkEnvelope) || isCapabilitySupported(networkEnvelope);
+    public boolean noCapabilityRequiredOrCapabilityIsSupported(Proto msg) {
+        return !isCapabilityRequired(msg) || isCapabilitySupported(msg);
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public static boolean isCapabilityRequired(NetworkEnvelope networkEnvelope) {
-        if (networkEnvelope instanceof AddDataMessage) {
-            final ProtectedStoragePayload protectedStoragePayload = (((AddDataMessage) networkEnvelope).getProtectedStorageEntry()).getProtectedStoragePayload();
+    public static boolean isCapabilityRequired(Proto msg) {
+        if (msg instanceof AddDataMessage) {
+            final ProtectedStoragePayload protectedStoragePayload = (((AddDataMessage) msg).getProtectedStorageEntry()).getProtectedStoragePayload();
             return protectedStoragePayload instanceof CapabilityRequiringPayload;
-        } else if (networkEnvelope instanceof AddPersistableNetworkPayloadMessage) {
-            final PersistableNetworkPayload persistableNetworkPayload = ((AddPersistableNetworkPayloadMessage) networkEnvelope).getPersistableNetworkPayload();
+        } else if (msg instanceof AddPersistableNetworkPayloadMessage) {
+            final PersistableNetworkPayload persistableNetworkPayload = ((AddPersistableNetworkPayloadMessage) msg).getPersistableNetworkPayload();
             return persistableNetworkPayload instanceof CapabilityRequiringPayload;
         } else {
-            return networkEnvelope instanceof CapabilityRequiringPayload;
+            return msg instanceof CapabilityRequiringPayload;
         }
     }
 
-    private boolean isCapabilitySupported(NetworkEnvelope networkEnvelope) {
-        if (networkEnvelope instanceof AddDataMessage) {
-            final ProtectedStoragePayload protectedStoragePayload = (((AddDataMessage) networkEnvelope).getProtectedStorageEntry()).getProtectedStoragePayload();
+    private boolean isCapabilitySupported(Proto msg) {
+        if (msg instanceof AddDataMessage) {
+            final ProtectedStoragePayload protectedStoragePayload = (((AddDataMessage) msg).getProtectedStorageEntry()).getProtectedStoragePayload();
             return protectedStoragePayload instanceof CapabilityRequiringPayload && isCapabilitySupported((CapabilityRequiringPayload) protectedStoragePayload);
-        } else if (networkEnvelope instanceof AddPersistableNetworkPayloadMessage) {
-            final PersistableNetworkPayload persistableNetworkPayload = ((AddPersistableNetworkPayloadMessage) networkEnvelope).getPersistableNetworkPayload();
+        } else if (msg instanceof AddPersistableNetworkPayloadMessage) {
+            final PersistableNetworkPayload persistableNetworkPayload = ((AddPersistableNetworkPayloadMessage) msg).getPersistableNetworkPayload();
             return persistableNetworkPayload instanceof CapabilityRequiringPayload && isCapabilitySupported((CapabilityRequiringPayload) persistableNetworkPayload);
         } else {
-            return networkEnvelope instanceof CapabilityRequiringPayload && isCapabilitySupported((CapabilityRequiringPayload) networkEnvelope);
+            return msg instanceof CapabilityRequiringPayload && isCapabilitySupported((CapabilityRequiringPayload) msg);
         }
     }
 

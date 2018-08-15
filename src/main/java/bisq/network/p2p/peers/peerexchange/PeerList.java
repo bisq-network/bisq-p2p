@@ -28,6 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.EqualsAndHashCode;
+
+@EqualsAndHashCode(callSuper = true)
 public class PeerList extends PersistableList<Peer> {
 
     public PeerList(List<Peer> list) {

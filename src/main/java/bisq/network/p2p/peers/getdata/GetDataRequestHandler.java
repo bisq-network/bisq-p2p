@@ -143,7 +143,7 @@ public class GetDataRequestHandler {
         return dataStorage.getAppendOnlyDataStoreMap().entrySet().stream()
                 .filter(e -> !excludedKeysAsByteArray.contains(e.getKey()))
                 .map(Map.Entry::getValue)
-                .filter(payload -> (connection.noCapabilityRequiredOrCapabilityIsSupported(getDataRequest)))
+                .filter(payload -> (connection.noCapabilityRequiredOrCapabilityIsSupported(payload)))
                 .filter(payload -> tempLookupSet.add(new P2PDataStorage.ByteArray(payload.getHash())))
                 .collect(Collectors.toSet());
     }

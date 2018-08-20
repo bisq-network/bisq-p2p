@@ -36,6 +36,8 @@ import java.util.Map;
 
 import lombok.extern.slf4j.Slf4j;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 /**
  * Not used anymore. We still need the class for supporting the transfer of th old data structure to the new.
  * Can be removed at the next hard fork.
@@ -111,5 +113,13 @@ public final class PersistableNetworkPayloadListService extends StoreService<Per
     @Override
     protected PersistableNetworkPayloadList createStore() {
         return new PersistableNetworkPayloadList();
+    }
+
+    @Override
+    protected void readStore() {
+        super.readStore();
+        checkArgument(store instanceof PersistableNetworkPayloadList,
+                "Store is not instance of TradeStatistics2Store. That can happen if the ProtoBuffer " +
+                        "file got changed. We clear the data store and recreated it again.");
     }
 }

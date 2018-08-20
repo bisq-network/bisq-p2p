@@ -28,6 +28,7 @@ import bisq.common.storage.Storage;
 import java.nio.file.Paths;
 
 import java.io.File;
+import java.io.IOException;
 
 import java.util.Map;
 
@@ -95,7 +96,18 @@ public abstract class StoreService<T extends PersistableEnvelope, R extends Pers
 
     protected void readFromResources(String postFix) {
         makeFileFromResourceFile(postFix);
-        readStore();
+        try {
+            readStore();
+        } catch (Throwable t) {
+            try {
+                String fileName = getFileName();
+                storage.removeAndBackupFile(fileName);
+            } catch (IOException e) {
+                log.error(e.toString());
+            }
+            makeFileFromResourceFile(postFix);
+            readStore();
+        }
     }
 
     protected void makeFileFromResourceFile(String postFix) {
@@ -127,7 +139,9 @@ public abstract class StoreService<T extends PersistableEnvelope, R extends Pers
         final String fileName = getFileName();
         store = storage.initAndGetPersistedWithFileName(fileName, 100);
         if (store != null) {
-            log.info("size of {}: {} kb", fileName, store.toProtoMessage().toByteArray().length / 100D);
+            log.info("{}: size of {}: {} kb", this.getClass().getSimpleName(),
+                    storage.getClass().getSimpleName(),
+                    store.toProtoMessage().toByteArray().length / 100D);
         } else {
             store = createStore();
         }

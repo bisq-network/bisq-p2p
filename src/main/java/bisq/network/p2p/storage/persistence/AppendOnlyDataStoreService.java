@@ -56,9 +56,11 @@ public class AppendOnlyDataStoreService {
     public void readFromResources(String postFix) {
         services.forEach(service -> service.readFromResources(postFix));
 
-        transferDeprecatedDataStructure();
+        // transferDeprecatedDataStructure();
     }
 
+    // Only needed for one time converting the old data store to the new ones. Can be removed after next release when we
+    // are sure that no issues occurred.
     private void transferDeprecatedDataStructure() {
         // We read the file if it exists in the db folder
         persistableNetworkPayloadListService.readStore();

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'network.bisq'
-version = '-SNAPSHOT'
+version = '0.8.0'
 
 sourceCompatibility = 1.8
 
@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    compile 'network.bisq:bisq-common:-SNAPSHOT'
+    compile 'network.bisq:bisq-common:0.8.0'
     compile('com.github.JesusMcCloud.netlayer:tor.native:0.4.2') {
         exclude(module: 'slf4j-api')
     }

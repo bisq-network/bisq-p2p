@@ -740,7 +740,17 @@ public class P2PService implements SetupListener, MessageListener, ConnectionLis
         // at the P2PService layer.
         // Though we have to check in the client classes to not apply the same message again as there is no guarantee
         // when we would get a message again from the network.
-        UserThread.runAfter(() -> delayedRemoveEntryFromMailbox(decryptedMessageWithPubKey), 2);
+        try {
+            UserThread.runAfter(() -> delayedRemoveEntryFromMailbox(decryptedMessageWithPubKey), 2);
+        } catch (NetworkNotReadyException t) {
+            // If we called too early it might throw a NetworkNotReadyException. We will try again
+            try {
+                UserThread.runAfter(() -> delayedRemoveEntryFromMailbox(decryptedMessageWithPubKey), 60);
+            } catch (NetworkNotReadyException ignore) {
+                log.warn("We tried to call delayedRemoveEntryFromMailbox 60 sec. after we received an " +
+                        "NetworkNotReadyException but it failed again. We give up here.");
+            }
+        }
     }
 
     private void delayedRemoveEntryFromMailbox(DecryptedMessageWithPubKey decryptedMessageWithPubKey) {
